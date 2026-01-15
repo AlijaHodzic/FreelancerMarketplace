@@ -5,8 +5,8 @@ namespace Freelance.Domain.Entities
 {
     public class Project : AuditableEntity
     {
-        public Guid ClientId { get; set; }
-        public User Client { get; set; } = null!;
+        public Guid OwnerId { get; set; }
+        public User Owner { get; set; } = null!;
 
         public string Title { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;

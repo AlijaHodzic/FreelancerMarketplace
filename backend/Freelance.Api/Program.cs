@@ -1,11 +1,14 @@
 using Freelance.Application.Interfaces;
 using Freelance.Infrastructure.Data;
 using Freelance.Infrastructure.Services;
+
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using System.Security.Claims;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +22,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 {
     options.UseSqlite(builder.Configuration.GetConnectionString("Default"));
 });
+builder.Services.AddScoped<IBidService, BidService>();
 
 // Application / Infrastructure services
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -33,6 +37,27 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options =>
 {
+    options.RequireHttpsMetadata = false;
+    options.SaveToken = true;
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            Console.WriteLine("TOKEN RECEIVED: " + context.Token);
+            return Task.CompletedTask;
+        },
+        OnAuthenticationFailed = context =>
+        {
+            Console.WriteLine("AUTH FAILED: " + context.Exception.Message);
+            return Task.CompletedTask;
+        },
+        OnTokenValidated = context =>
+        {
+            Console.WriteLine("TOKEN VALIDATED");
+            return Task.CompletedTask;
+        }
+    };
+
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
@@ -47,14 +72,27 @@ builder.Services.AddAuthentication(options =>
             Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)
         ),
 
-        ClockSkew = TimeSpan.Zero
+
+        ClockSkew = TimeSpan.Zero,
+        
+        NameClaimType = ClaimTypes.NameIdentifier,
+        RoleClaimType = ClaimTypes.Role
     };
 });
+
 
 builder.Services.AddAuthorization();
 
 // ===================== SWAGGER =====================
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(
+            new System.Text.Json.Serialization.JsonStringEnumConverter()
+        );
+    });
+
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo

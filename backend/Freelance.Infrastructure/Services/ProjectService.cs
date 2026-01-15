@@ -20,7 +20,7 @@ namespace Freelance.Infrastructure.Services
         {
             var project = new Project
             {
-                ClientId = userId,
+                OwnerId = userId,
                 Title = request.Title,
                 Description = request.Description,
                 BudgetMin = request.BudgetMin,
@@ -45,7 +45,7 @@ namespace Freelance.Infrastructure.Services
         public async Task<IEnumerable<ProjectResponse>> GetMineAsync(Guid userId)
         {
             return await _db.Projects
-                .Where(x => x.ClientId == userId)
+                .Where(x => x.OwnerId == userId)
                 .OrderByDescending(x => x.CreatedAtUtc)
                 .Select(x => Map(x))
                 .ToListAsync();
@@ -59,7 +59,7 @@ namespace Freelance.Infrastructure.Services
             if (project == null)
                 throw new Exception("Project not found");
 
-            if (project.ClientId != userId)
+            if (project.OwnerId != userId)
                 throw new Exception("Not allowed");
 
             project.Title = request.Title;
@@ -81,7 +81,7 @@ namespace Freelance.Infrastructure.Services
             if (project == null)
                 throw new Exception("Project not found");
 
-            if (project.ClientId != userId)
+            if (project.OwnerId != userId)
                 throw new Exception("Not allowed");
 
             _db.Projects.Remove(project);

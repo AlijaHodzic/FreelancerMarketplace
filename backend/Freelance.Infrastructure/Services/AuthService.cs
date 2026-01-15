@@ -4,6 +4,8 @@ using Freelance.Application.Interfaces;
 using Freelance.Domain.Entities;
 using Freelance.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using Freelance.Domain.Enums;
+
 
 namespace Freelance.Infrastructure.Services
 {
@@ -28,7 +30,9 @@ namespace Freelance.Infrastructure.Services
             {
                 Email = request.Email,
                 FullName = request.FullName,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password)
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
+                Role = request.Role
+
             };
 
             _db.Users.Add(user);
