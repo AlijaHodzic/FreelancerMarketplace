@@ -31,9 +31,9 @@ public class ProjectConfig : IEntityTypeConfiguration<Project>
         b.Property(x => x.Status).IsRequired();
         b.Property(x => x.CreatedAtUtc).IsRequired();
 
-        b.HasOne(x => x.Client)
+        b.HasOne(x => x.Owner)
             .WithMany(u => u.Projects)
-            .HasForeignKey(x => x.ClientId)
+            .HasForeignKey(x => x.OwnerId)
             .OnDelete(DeleteBehavior.Restrict);
 
         b.HasMany(x => x.Bids)
