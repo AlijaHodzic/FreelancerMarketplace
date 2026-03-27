@@ -18,13 +18,20 @@ namespace Freelance.Api.Controllers
             _service = service;
         }
 
-        private Guid UserId =>
-            Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        private Guid UserId => Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
         [HttpPost]
+        [Authorize(Roles = "Client,Admin")]
         public async Task<IActionResult> Create(CreateProjectRequest request)
         {
-            return Ok(await _service.CreateAsync(UserId, request));
+            try
+            {
+                return Ok(await _service.CreateAsync(UserId, request));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpGet]
@@ -35,22 +42,46 @@ namespace Freelance.Api.Controllers
         }
 
         [HttpGet("mine")]
+        [Authorize(Roles = "Client,Admin")]
         public async Task<IActionResult> GetMine()
         {
-            return Ok(await _service.GetMineAsync(UserId));
+            try
+            {
+                return Ok(await _service.GetMineAsync(UserId));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpPut("{id:guid}")]
+        [Authorize(Roles = "Client,Admin")]
         public async Task<IActionResult> Update(Guid id, UpdateProjectRequest request)
         {
-            return Ok(await _service.UpdateAsync(UserId, id, request));
+            try
+            {
+                return Ok(await _service.UpdateAsync(UserId, id, request));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpDelete("{id:guid}")]
+        [Authorize(Roles = "Client,Admin")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            await _service.DeleteAsync(UserId, id);
-            return NoContent();
+            try
+            {
+                await _service.DeleteAsync(UserId, id);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
     }
 }

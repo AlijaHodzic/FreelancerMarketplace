@@ -1,0 +1,42 @@
+<div class="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+  <!-- Rating -->
+  <div class="flex items-center space-x-1 mb-4">
+    <svg
+      *ngFor="let _ of stars; let i = index"
+      class="w-4 h-4"
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      [ngClass]="
+        i < testimonial.rating
+          ? 'text-yellow-400'
+          : 'text-gray-300'
+      "
+    >
+      <path
+        d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22 12 18.56 5.82 22 7 14.14l-5-4.87 6.91-1.01L12 2z"
+      />
+    </svg>
+  </div>
+
+  <!-- Content -->
+  <p class="text-gray-700 mb-6 leading-relaxed">
+    "{{ testimonial.content }}"
+  </p>
+
+  <!-- Author -->
+  <div class="flex items-center space-x-3">
+    <img
+      [src]="testimonial.avatar"
+      [alt]="testimonial.name"
+      class="w-12 h-12 rounded-full object-cover"
+    />
+    <div>
+      <p class="font-semibold text-gray-900">
+        {{ testimonial.name }}
+      </p>
+      <p class="text-sm text-gray-500">
+        {{ testimonial.role }} at {{ testimonial.company }}
+      </p>
+    </div>
+  </div>
+</div>

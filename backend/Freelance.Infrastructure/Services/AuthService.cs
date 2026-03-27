@@ -2,10 +2,9 @@ using BCrypt.Net;
 using Freelance.Application.DTOs.Auth;
 using Freelance.Application.Interfaces;
 using Freelance.Domain.Entities;
+using Freelance.Domain.Enums;
 using Freelance.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
-using Freelance.Domain.Enums;
-
 
 namespace Freelance.Infrastructure.Services
 {
@@ -22,32 +21,35 @@ namespace Freelance.Infrastructure.Services
 
         public async Task<AuthResponse> RegisterAsync(RegisterRequest request)
         {
-            var emailExists = await _db.Users.AnyAsync(u => u.Email == request.Email);
+            var normalizedEmail = request.Email.Trim().ToLowerInvariant();
+            var emailExists = await _db.Users.AnyAsync(u => u.Email == normalizedEmail);
             if (emailExists)
                 throw new Exception("Email already exists");
 
+            if (request.Role is not UserRole.Client and not UserRole.Freelancer)
+                throw new Exception("Only client and freelancer accounts can be registered");
+
             var user = new User
             {
-                Email = request.Email,
-                FullName = request.FullName,
+                Email = normalizedEmail,
+                FullName = request.FullName.Trim(),
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
                 Role = request.Role
-
             };
 
             _db.Users.Add(user);
+            var refreshToken = CreateRefreshToken(user.Id);
+            _db.RefreshTokens.Add(refreshToken);
+
             await _db.SaveChangesAsync();
 
-            return new AuthResponse
-            {
-                AccessToken = _jwt.GenerateAccessToken(user),
-                RefreshToken = "TEMP_REFRESH_TOKEN"
-            };
+            return CreateAuthResponse(user, refreshToken.Token);
         }
 
         public async Task<AuthResponse> LoginAsync(LoginRequest request)
         {
-            var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
+            var normalizedEmail = request.Email.Trim().ToLowerInvariant();
+            var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == normalizedEmail);
             if (user == null)
                 throw new Exception("Invalid credentials");
 
@@ -55,12 +57,13 @@ namespace Freelance.Infrastructure.Services
             if (!validPassword)
                 throw new Exception("Invalid credentials");
 
-            return new AuthResponse
-            {
-                AccessToken = _jwt.GenerateAccessToken(user),
-                RefreshToken = "TEMP_REFRESH_TOKEN"
-            };
+            var refreshToken = CreateRefreshToken(user.Id);
+            _db.RefreshTokens.Add(refreshToken);
+            await _db.SaveChangesAsync();
+
+            return CreateAuthResponse(user, refreshToken.Token);
         }
+
         public async Task<AuthResponse> RefreshAsync(RefreshTokenRequest request)
         {
             var token = await _db.RefreshTokens
@@ -77,24 +80,9 @@ namespace Freelance.Infrastructure.Services
 
             var newRefreshToken = CreateRefreshToken(token.UserId);
             _db.RefreshTokens.Add(newRefreshToken);
-
             await _db.SaveChangesAsync();
 
-            return new AuthResponse
-            {
-                AccessToken = _jwt.GenerateAccessToken(token.User),
-                RefreshToken = newRefreshToken.Token
-            };
-        }
-
-        private RefreshToken CreateRefreshToken(Guid userId)
-        {
-            return new RefreshToken
-            {
-                UserId = userId,
-                Token = RefreshTokenGenerator.GenerateToken(),
-                ExpiresAtUtc = DateTime.UtcNow.AddDays(7)
-            };
+            return CreateAuthResponse(token.User, newRefreshToken.Token);
         }
 
         public async Task LogoutAsync(string refreshToken)
@@ -109,6 +97,30 @@ namespace Freelance.Infrastructure.Services
             }
         }
 
+        private RefreshToken CreateRefreshToken(Guid userId)
+        {
+            return new RefreshToken
+            {
+                UserId = userId,
+                Token = RefreshTokenGenerator.GenerateToken(),
+                ExpiresAtUtc = DateTime.UtcNow.AddDays(7)
+            };
+        }
 
+        private AuthResponse CreateAuthResponse(User user, string refreshToken)
+        {
+            return new AuthResponse
+            {
+                AccessToken = _jwt.GenerateAccessToken(user),
+                RefreshToken = refreshToken,
+                User = new AuthUserDto
+                {
+                    Id = user.Id,
+                    Email = user.Email,
+                    FullName = user.FullName,
+                    Role = user.Role
+                }
+            };
+        }
     }
 }

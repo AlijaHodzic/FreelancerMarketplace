@@ -6,9 +6,9 @@ using System.Security.Claims;
 
 namespace Freelance.Api.Controllers;
 
-[Authorize(Roles = "Freelancer")]
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class BidsController : ControllerBase
 {
     private readonly IBidService _bidService;
@@ -18,43 +18,70 @@ public class BidsController : ControllerBase
         _bidService = bidService;
     }
 
-    // POST: api/bids
     [HttpPost]
+    [Authorize(Roles = "Freelancer,Admin")]
     public async Task<ActionResult<BidResponse>> Create([FromBody] CreateBidRequest request)
     {
-        var freelancerId = GetUserId();
-        var result = await _bidService.CreateAsync(freelancerId, request);
-        return Ok(result);
+        try
+        {
+            var freelancerId = GetUserId();
+            var result = await _bidService.CreateAsync(freelancerId, request);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
-    // GET: api/bids/project/{projectId}
     [HttpGet("project/{projectId}")]
+    [Authorize(Roles = "Client,Admin")]
     public async Task<ActionResult<IEnumerable<BidResponse>>> GetByProject(Guid projectId)
     {
-        var requesterId = GetUserId();
-        var result = await _bidService.GetByProjectAsync(projectId, requesterId);
-        return Ok(result);
+        try
+        {
+            var requesterId = GetUserId();
+            var result = await _bidService.GetByProjectAsync(projectId, requesterId);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
-    // POST: api/bids/{bidId}/accept
     [HttpPost("{bidId}/accept")]
+    [Authorize(Roles = "Client,Admin")]
     public async Task<IActionResult> Accept(Guid bidId)
     {
-        var ownerId = GetUserId();
-        await _bidService.AcceptAsync(bidId, ownerId);
-        return NoContent();
+        try
+        {
+            var ownerId = GetUserId();
+            await _bidService.AcceptAsync(bidId, ownerId);
+            return NoContent();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
-    // POST: api/bids/{bidId}/reject
     [HttpPost("{bidId}/reject")]
+    [Authorize(Roles = "Client,Admin")]
     public async Task<IActionResult> Reject(Guid bidId)
     {
-        var ownerId = GetUserId();
-        await _bidService.RejectAsync(bidId, ownerId);
-        return NoContent();
+        try
+        {
+            var ownerId = GetUserId();
+            await _bidService.RejectAsync(bidId, ownerId);
+            return NoContent();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
-    // ===================== HELPERS =====================
     private Guid GetUserId()
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);

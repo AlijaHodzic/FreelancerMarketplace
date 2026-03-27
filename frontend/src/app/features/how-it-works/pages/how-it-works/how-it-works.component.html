@@ -1,0 +1,73 @@
+<section class="min-h-screen bg-slate-50 py-16">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center max-w-3xl mx-auto mb-14 pt-4">
+      <h1 class="text-4xl md:text-5xl font-bold text-slate-900 mb-4">How It Works</h1>
+      <p class="text-lg text-slate-600">
+        Learn how FreelanceHub helps clients hire and freelancers get paid
+      </p>
+    </div>
+
+    <div class="grid gap-6 lg:grid-cols-2 mb-12">
+      <article class="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
+        <div class="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-500 flex items-center justify-center mb-5">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h8M8 11h8M8 15h5"></path>
+            <rect x="4" y="3" width="16" height="18" rx="2"></rect>
+          </svg>
+        </div>
+        <h2 class="text-3xl font-bold text-slate-900 mb-2">For Clients</h2>
+        <p class="text-slate-500 mb-8">Hire talented freelancers for your projects</p>
+
+        <div class="space-y-6">
+          <div *ngFor="let step of clientSteps; let i = index" class="flex gap-4">
+            <div class="w-8 h-8 rounded-full bg-indigo-50 text-indigo-500 flex items-center justify-center text-sm font-semibold shrink-0">
+              {{ i + 1 }}
+            </div>
+            <div>
+              <h3 class="text-lg font-semibold text-slate-900 mb-1">{{ step.title }}</h3>
+              <p class="text-sm leading-6 text-slate-500">{{ step.description }}</p>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
+        <div class="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-500 flex items-center justify-center mb-5">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="8" r="4"></circle>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 20c1.5-3.5 4.5-5 8-5s6.5 1.5 8 5"></path>
+          </svg>
+        </div>
+        <h2 class="text-3xl font-bold text-slate-900 mb-2">For Freelancers</h2>
+        <p class="text-slate-500 mb-8">Find projects and grow your career</p>
+
+        <div class="space-y-6">
+          <div *ngFor="let step of freelancerSteps; let i = index" class="flex gap-4">
+            <div class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center text-sm font-semibold shrink-0">
+              {{ i + 1 }}
+            </div>
+            <div>
+              <h3 class="text-lg font-semibold text-slate-900 mb-1">{{ step.title }}</h3>
+              <p class="text-sm leading-6 text-slate-500">{{ step.description }}</p>
+            </div>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <div class="rounded-[28px] bg-gradient-to-r from-indigo-500 to-blue-600 px-6 py-10 md:px-10 text-center text-white shadow-lg">
+      <h2 class="text-3xl md:text-4xl font-bold mb-4">Ready to get started?</h2>
+      <p class="text-blue-100 text-lg mb-8">
+        Join thousands of clients and freelancers already working together on FreelanceHub
+      </p>
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <a routerLink="/register" class="min-w-44 rounded-xl bg-white px-6 py-3 font-semibold text-indigo-600 hover:bg-slate-100 transition-colors">
+          Get Started
+        </a>
+        <a routerLink="/marketplace" class="min-w-44 rounded-xl border border-white/30 bg-white/10 px-6 py-3 font-semibold text-white hover:bg-white/20 transition-colors">
+          Browse Freelancers
+        </a>
+      </div>
+    </div>
+  </div>
+</section>

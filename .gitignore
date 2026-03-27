@@ -8,3 +8,8 @@ appsettings.Development.json
 appsettings.Production.json
 node_modules/
 .env
+.angular/
+dist/
+backend/Freelance.Api/*.db-shm
+backend/Freelance.Api/*.db-wal
+backend/Freelance.Api/*.backup-*.db

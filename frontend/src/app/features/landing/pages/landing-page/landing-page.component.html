@@ -1,0 +1,224 @@
+<div class="min-h-screen bg-white">
+  <section class="bg-gradient-to-b from-blue-50 to-white pt-16 pb-24">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center max-w-3xl mx-auto">
+        <h1 class="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
+          Hire Expert Freelancers for Your Next Project
+        </h1>
+        <p class="text-xl text-gray-600 mb-8">
+          Connect with talented professionals worldwide. Get quality work delivered on time, within budget.
+        </p>
+
+        <div class="bg-white rounded-xl shadow-lg p-2 max-w-2xl mx-auto mb-8">
+          <div class="flex items-center space-x-2">
+            <svg class="w-5 h-5 text-gray-400 ml-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.3-4.3"></path>
+              <circle cx="11" cy="11" r="7"></circle>
+            </svg>
+
+            <input
+              type="text"
+              placeholder="Search for freelancers, skills, or projects..."
+              class="flex-1 px-3 py-3 text-gray-900 placeholder-gray-500 focus:outline-none"
+            />
+
+            <button
+              type="button"
+              (click)="goTo('/marketplace')"
+              class="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Search
+            </button>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-center gap-2 text-sm">
+          <span class="text-gray-500">Popular:</span>
+
+          <button
+            *ngFor="let term of popularTerms"
+            type="button"
+            (click)="goTo('/marketplace')"
+            class="px-3 py-1 bg-white border border-gray-200 text-gray-700 rounded-full hover:border-blue-300 hover:text-blue-600 transition-colors"
+          >
+            {{ term }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-12 bg-white border-y border-gray-100">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+        <div *ngFor="let stat of stats" class="text-center">
+          <p class="text-3xl md:text-4xl font-bold text-blue-600 mb-2">{{ stat.value }}</p>
+          <p class="text-sm text-gray-600">{{ stat.label }}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-20 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Why Choose FreelanceHub?</h2>
+        <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+          Everything you need to hire, manage, and pay freelancers with confidence
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-8">
+        <div
+          *ngFor="let feature of features"
+          class="bg-white rounded-xl p-8 border border-gray-200 hover:shadow-lg transition-shadow"
+        >
+          <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+            <ng-container [ngSwitch]="feature.icon">
+              <svg *ngSwitchCase="'users'" class="w-6 h-6 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+              </svg>
+
+              <svg *ngSwitchCase="'shield'" class="w-6 h-6 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+              </svg>
+
+              <svg *ngSwitchCase="'zap'" class="w-6 h-6 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13 2 3 14h8l-1 8 11-14h-8l1-6z"></path>
+              </svg>
+
+              <svg *ngSwitchCase="'clock'" class="w-6 h-6 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2"></path>
+              </svg>
+
+              <svg *ngSwitchCase="'check'" class="w-6 h-6 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M20 6 9 17l-5-5"></path>
+              </svg>
+            </ng-container>
+          </div>
+
+          <h3 class="font-semibold text-gray-900 mb-2">{{ feature.title }}</h3>
+          <p class="text-gray-600 text-sm leading-relaxed">{{ feature.description }}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-20 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Browse by Category</h2>
+        <p class="text-lg text-gray-600">Find the perfect freelancer for your project needs</p>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <app-category-card *ngFor="let category of categories" [category]="category"></app-category-card>
+      </div>
+
+      <div class="text-center mt-8">
+        <button type="button" (click)="goTo('/marketplace')" class="text-blue-600 font-medium hover:text-blue-700 transition-colors">
+          View All Categories ->
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-20 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Trusted by Thousands</h2>
+        <p class="text-lg text-gray-600">See what our clients say about their experience</p>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-8">
+        <app-testimonial-card
+          *ngFor="let testimonial of testimonials"
+          [testimonial]="testimonial"
+        ></app-testimonial-card>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-20 bg-blue-600">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">Ready to Find Your Perfect Freelancer?</h2>
+      <p class="text-xl text-blue-100 mb-8">
+        Join thousands of businesses who trust FreelanceHub for their projects
+      </p>
+
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <button
+          type="button"
+          (click)="goTo('/marketplace')"
+          class="px-8 py-4 bg-white text-blue-600 font-semibold rounded-lg hover:bg-gray-100 transition-colors w-full sm:w-auto"
+        >
+          Browse Freelancers
+        </button>
+
+        <button
+          type="button"
+          (click)="goTo('/post-job')"
+          class="px-8 py-4 bg-blue-700 text-white font-semibold rounded-lg hover:bg-blue-800 transition-colors border-2 border-white w-full sm:w-auto"
+        >
+          Post a Project
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <footer class="bg-gray-900 text-gray-300 py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid md:grid-cols-4 gap-8 mb-8">
+        <div>
+          <div class="flex items-center space-x-2 mb-4">
+            <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+              <span class="text-white font-bold">F</span>
+            </div>
+            <span class="font-semibold text-white">FreelanceHub</span>
+          </div>
+          <p class="text-sm text-gray-400">
+            Connecting talented freelancers with amazing opportunities worldwide.
+          </p>
+        </div>
+
+        <div>
+          <h4 class="font-semibold text-white mb-4">For Clients</h4>
+          <ul class="space-y-2">
+            <li><button class="text-sm hover:text-white transition-colors" type="button">How to Hire</button></li>
+            <li><button class="text-sm hover:text-white transition-colors" type="button">Talent Marketplace</button></li>
+            <li><button class="text-sm hover:text-white transition-colors" type="button">Project Catalog</button></li>
+            <li><button class="text-sm hover:text-white transition-colors" type="button">Enterprise</button></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="font-semibold text-white mb-4">For Freelancers</h4>
+          <ul class="space-y-2">
+            <li><button class="text-sm hover:text-white transition-colors" type="button">How to Find Work</button></li>
+            <li><button class="text-sm hover:text-white transition-colors" type="button">Direct Contracts</button></li>
+            <li><button class="text-sm hover:text-white transition-colors" type="button">Find Freelance Jobs</button></li>
+            <li><button class="text-sm hover:text-white transition-colors" type="button">Success Stories</button></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="font-semibold text-white mb-4">Company</h4>
+          <ul class="space-y-2">
+            <li><button class="text-sm hover:text-white transition-colors" type="button">About Us</button></li>
+            <li><button class="text-sm hover:text-white transition-colors" type="button">Contact</button></li>
+            <li><button class="text-sm hover:text-white transition-colors" type="button">Trust & Safety</button></li>
+            <li><button class="text-sm hover:text-white transition-colors" type="button">Help & Support</button></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="border-t border-gray-800 pt-8 text-center text-sm text-gray-400">
+        <p>&copy; 2026 FreelanceHub. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+</div>

@@ -36,19 +36,21 @@ namespace Freelance.Infrastructure.Services
 
         public async Task<IEnumerable<ProjectResponse>> GetAllAsync()
         {
-            return await _db.Projects
+            var projects = await _db.Projects
                 .OrderByDescending(x => x.CreatedAtUtc)
-                .Select(x => Map(x))
                 .ToListAsync();
+
+            return projects.Select(Map);
         }
 
         public async Task<IEnumerable<ProjectResponse>> GetMineAsync(Guid userId)
         {
-            return await _db.Projects
+            var projects = await _db.Projects
                 .Where(x => x.OwnerId == userId)
                 .OrderByDescending(x => x.CreatedAtUtc)
-                .Select(x => Map(x))
                 .ToListAsync();
+
+            return projects.Select(Map);
         }
 
         public async Task<ProjectResponse> UpdateAsync(Guid userId, Guid projectId, UpdateProjectRequest request)

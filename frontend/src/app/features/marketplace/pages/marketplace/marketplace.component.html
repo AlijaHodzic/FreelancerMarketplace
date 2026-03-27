@@ -1,0 +1,82 @@
+<section class="min-h-screen bg-white py-12 md:py-16">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="mb-8 md:mb-10">
+      <h1 class="text-4xl md:text-5xl font-bold tracking-tight text-slate-900 mb-3">Find Freelancers</h1>
+      <p class="text-lg text-slate-500">Discover talented professionals for your next project</p>
+    </div>
+
+    <div class="rounded-2xl border border-slate-200 bg-white p-4 md:p-5 mb-8 shadow-sm">
+      <div class="flex items-center gap-3">
+        <svg class="w-5 h-5 text-slate-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.3-4.3"></path>
+          <circle cx="11" cy="11" r="7"></circle>
+        </svg>
+        <input
+          type="text"
+          placeholder="Search by name, skill, or title..."
+          class="w-full text-slate-700 placeholder:text-slate-400 outline-none"
+        />
+      </div>
+    </div>
+
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
+      <p class="text-sm text-slate-600"><span class="font-semibold text-slate-900">{{ freelancers.length }}</span> freelancers found</p>
+      <div class="flex items-center gap-3">
+        <div class="hidden md:flex flex-wrap gap-2">
+          <span *ngFor="let filter of filters" class="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs text-slate-600">
+            {{ filter }}
+          </span>
+        </div>
+        <button type="button" class="rounded-xl border border-slate-200 px-4 py-2 text-sm text-slate-700 bg-white">
+          Best Match
+        </button>
+      </div>
+    </div>
+
+    <div class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+      <article *ngFor="let freelancer of freelancers" class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div class="flex gap-4 mb-4">
+          <img [src]="freelancer.avatar" [alt]="freelancer.name" class="w-14 h-14 rounded-full object-cover border border-slate-200" />
+          <div class="min-w-0">
+            <h2 class="text-lg font-semibold text-slate-900 leading-tight">{{ freelancer.name }}</h2>
+            <p class="text-sm text-slate-500">{{ freelancer.title }}</p>
+            <div class="flex items-center gap-1 mt-1 text-sm">
+              <span class="text-amber-400">&#9733;</span>
+              <span class="font-medium text-slate-800">{{ freelancer.rating }}</span>
+              <span class="text-slate-400">({{ freelancer.reviews }})</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 text-sm text-slate-400 mb-3">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 21s-6-4.35-6-10a6 6 0 1 1 12 0c0 5.65-6 10-6 10z"></path>
+            <circle cx="12" cy="11" r="2.5"></circle>
+          </svg>
+          <span>{{ freelancer.location }}</span>
+        </div>
+
+        <p class="text-sm leading-6 text-slate-600 mb-4">{{ freelancer.description }}</p>
+
+        <div class="flex flex-wrap gap-2 mb-5">
+          <span *ngFor="let skill of freelancer.skills" class="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
+            {{ skill }}
+          </span>
+        </div>
+
+        <div class="flex items-end justify-between gap-4">
+          <div>
+            <p class="text-xs text-slate-400">Hourly Rate</p>
+            <p class="text-lg font-semibold text-slate-900">${{ freelancer.hourlyRate }}/hr</p>
+          </div>
+          <a
+            [routerLink]="['/freelancers', freelancer.slug]"
+            class="inline-flex items-center justify-center rounded-xl bg-indigo-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-600 transition-colors"
+          >
+            View Profile
+          </a>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>

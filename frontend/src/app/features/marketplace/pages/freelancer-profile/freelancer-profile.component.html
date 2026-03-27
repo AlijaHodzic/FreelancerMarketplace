@@ -1,0 +1,169 @@
+<section class="min-h-screen bg-slate-50 py-12 md:py-14">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8" *ngIf="freelancer() as freelancer; else notFound">
+    <a routerLink="/marketplace" class="inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-slate-800 transition-colors mb-8">
+      <span>&larr;</span>
+      <span>Back to Marketplace</span>
+    </a>
+
+    <div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-start">
+      <div class="space-y-6">
+        <section class="rounded-3xl border border-slate-200 bg-white p-6 md:p-7 shadow-sm">
+          <div class="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
+            <div class="flex flex-col gap-5 sm:flex-row sm:items-start">
+              <img [src]="freelancer.avatar" [alt]="freelancer.name" class="h-28 w-28 rounded-full object-cover border border-slate-200 shadow-sm" />
+
+              <div>
+                <h1 class="text-4xl font-bold tracking-tight text-slate-900 mb-2">{{ freelancer.name }}</h1>
+                <p class="text-2xl text-slate-500 mb-3">{{ freelancer.title }}</p>
+
+                <div class="flex flex-wrap items-center gap-2 text-sm mb-2">
+                  <span class="text-amber-400">&#9733;</span>
+                  <span class="font-semibold text-slate-900">{{ freelancer.rating }}</span>
+                  <span class="text-slate-400">({{ freelancer.reviews }} reviews)</span>
+                </div>
+
+                <div class="flex items-center gap-2 text-slate-500">
+                  <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 21s-6-4.35-6-10a6 6 0 1 1 12 0c0 5.65-6 10-6 10z"></path>
+                    <circle cx="12" cy="11" r="2.5"></circle>
+                  </svg>
+                  <span>{{ freelancer.location }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="rounded-2xl bg-slate-50 px-5 py-4 min-w-32">
+              <p class="text-xs uppercase tracking-[0.2em] text-slate-400 mb-2">Hourly Rate</p>
+              <p class="text-4xl font-bold text-slate-900">{{ freelancer.hourlyRate | currency: 'USD' : 'symbol' : '1.0-0' }}</p>
+              <p class="text-sm text-slate-500 mt-1">per hour</p>
+            </div>
+          </div>
+
+          <div class="mt-6 border-t border-slate-100 pt-6 grid gap-4 sm:grid-cols-3">
+            <div>
+              <p class="text-sm text-slate-400 mb-1">Projects</p>
+              <p class="text-2xl font-semibold text-slate-900">{{ freelancer.completedProjects }}</p>
+            </div>
+            <div>
+              <p class="text-sm text-slate-400 mb-1">Response</p>
+              <p class="text-2xl font-semibold text-slate-900">{{ freelancer.responseTime }}</p>
+            </div>
+            <div>
+              <p class="text-sm text-slate-400 mb-1">Success</p>
+              <p class="text-2xl font-semibold text-slate-900">{{ freelancer.successRate }}</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="rounded-3xl border border-slate-200 bg-white p-6 md:p-7 shadow-sm">
+          <h2 class="text-3xl font-semibold text-slate-900 mb-4">About</h2>
+          <p class="text-slate-600 leading-8">{{ freelancer.about }}</p>
+        </section>
+
+        <section class="rounded-3xl border border-slate-200 bg-white p-6 md:p-7 shadow-sm">
+          <h2 class="text-3xl font-semibold text-slate-900 mb-5">Skills</h2>
+          <div class="flex flex-wrap gap-3">
+            <span *ngFor="let skill of freelancer.skills" class="rounded-xl bg-indigo-50 px-4 py-2 text-sm font-semibold text-indigo-600">
+              {{ skill }}
+            </span>
+          </div>
+        </section>
+
+        <section class="rounded-3xl border border-slate-200 bg-white p-6 md:p-7 shadow-sm" *ngIf="freelancer.portfolio.length">
+          <h2 class="text-3xl font-semibold text-slate-900 mb-5">Portfolio</h2>
+          <div class="grid gap-6 md:grid-cols-2">
+            <article *ngFor="let item of freelancer.portfolio" class="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+              <img [src]="item.image" [alt]="item.title" class="h-44 w-full object-cover" />
+              <div class="p-5">
+                <h3 class="text-xl font-semibold text-slate-900 mb-2">{{ item.title }}</h3>
+                <p class="text-sm leading-7 text-slate-600 mb-4">{{ item.summary }}</p>
+                <div class="flex flex-wrap gap-2">
+                  <span *ngFor="let tag of item.tags" class="rounded-lg bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
+                    {{ tag }}
+                  </span>
+                </div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="rounded-3xl border border-slate-200 bg-white p-6 md:p-7 shadow-sm" *ngIf="freelancer.testimonials.length">
+          <h2 class="text-3xl font-semibold text-slate-900 mb-5">Reviews ({{ freelancer.reviews }})</h2>
+          <div class="space-y-6">
+            <article *ngFor="let review of freelancer.testimonials; let isLast = last" [class.border-b]="!isLast" class="border-slate-100 pb-6 last:pb-0">
+              <div class="flex gap-4">
+                <img [src]="review.avatar" [alt]="review.author" class="h-12 w-12 rounded-full object-cover border border-slate-200" />
+                <div class="min-w-0 flex-1">
+                  <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                      <h3 class="text-lg font-semibold text-slate-900">{{ review.author }}</h3>
+                      <p class="text-sm text-slate-400">{{ review.project }}</p>
+                    </div>
+                    <p class="text-sm text-slate-400">{{ review.date }}</p>
+                  </div>
+
+                  <div class="mt-2 flex gap-1">
+                    <span *ngFor="let star of stars" class="text-amber-400">&#9733;</span>
+                  </div>
+
+                  <p class="mt-3 text-slate-600 leading-7">{{ review.comment }}</p>
+                </div>
+              </div>
+            </article>
+          </div>
+        </section>
+      </div>
+
+      <aside class="lg:sticky lg:top-24">
+        <div class="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
+          <div class="space-y-3">
+            <button type="button" class="w-full rounded-2xl bg-indigo-500 px-5 py-3.5 text-sm font-semibold text-white hover:bg-indigo-600 transition-colors">
+              Hire Now
+            </button>
+            <button type="button" class="w-full rounded-2xl border border-slate-200 px-5 py-3.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors">
+              Send Message
+            </button>
+            <button type="button" class="w-full rounded-2xl border border-slate-200 px-5 py-3.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors">
+              Invite to Job
+            </button>
+          </div>
+
+          <div class="mt-5 border-t border-slate-100 pt-5 space-y-4">
+            <div class="flex items-center justify-between gap-3 text-sm">
+              <span class="text-slate-400">Category</span>
+              <span class="font-semibold text-slate-900">{{ freelancer.category }}</span>
+            </div>
+            <div class="flex items-center justify-between gap-3 text-sm">
+              <span class="text-slate-400">Experience</span>
+              <span class="font-semibold text-slate-900">{{ freelancer.experience }}</span>
+            </div>
+            <div class="flex items-center justify-between gap-3 text-sm">
+              <span class="text-slate-400">Response Time</span>
+              <span class="font-semibold text-slate-900">{{ freelancer.responseTime }}</span>
+            </div>
+            <div class="flex items-center justify-between gap-3 text-sm">
+              <span class="text-slate-400">Success Rate</span>
+              <span class="font-semibold text-emerald-500">{{ freelancer.successRate }}</span>
+            </div>
+          </div>
+
+          <p class="mt-6 text-xs leading-6 text-slate-400">
+            By hiring this freelancer, you agree to FreelanceHub&apos;s Terms of Service and Payment Protection Policy.
+          </p>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <ng-template #notFound>
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="rounded-3xl border border-slate-200 bg-white p-10 text-center shadow-sm">
+        <h1 class="text-3xl font-semibold text-slate-900 mb-3">Freelancer not found</h1>
+        <p class="text-slate-500 mb-6">The profile you were looking for is not available right now.</p>
+        <a routerLink="/marketplace" class="inline-flex items-center justify-center rounded-xl bg-indigo-500 px-5 py-3 text-sm font-semibold text-white hover:bg-indigo-600 transition-colors">
+          Back to Marketplace
+        </a>
+      </div>
+    </div>
+  </ng-template>
+</section>
