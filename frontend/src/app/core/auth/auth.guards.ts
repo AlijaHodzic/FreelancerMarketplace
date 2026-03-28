@@ -22,7 +22,22 @@ export const clientOnlyGuard: CanActivateFn = () => {
   }
 
   if (authService.role() === 'Freelancer') {
-    return router.createUrlTree(['/jobs']);
+    return router.createUrlTree(['/freelancer-dashboard']);
+  }
+
+  return true;
+};
+
+export const freelancerOnlyGuard: CanActivateFn = () => {
+  const authService = inject(AuthService);
+  const router = inject(Router);
+
+  if (!authService.isAuthenticated()) {
+    return router.createUrlTree(['/login']);
+  }
+
+  if (authService.role() !== 'Freelancer') {
+    return router.createUrlTree(['/marketplace']);
   }
 
   return true;
@@ -44,7 +59,7 @@ export const marketplaceAccessGuard: CanActivateFn = () => {
   const router = inject(Router);
 
   if (authService.role() === 'Freelancer') {
-    return router.createUrlTree(['/jobs']);
+    return router.createUrlTree(['/freelancer-dashboard']);
   }
 
   return true;

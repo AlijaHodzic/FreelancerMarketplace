@@ -49,7 +49,7 @@ export class AuthService {
 
   getDefaultRouteForRole(role: UserRole | null) {
     if (role === 'Freelancer') {
-      return '/jobs';
+      return '/freelancer-dashboard';
     }
 
     return '/marketplace';

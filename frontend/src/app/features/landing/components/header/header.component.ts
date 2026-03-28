@@ -41,6 +41,7 @@ export class HeaderComponent {
 
   private readonly freelancerNavLinks: HeaderLink[] = [
     { label: 'Home', path: '/' },
+    { label: 'Dashboard', path: '/freelancer-dashboard' },
     { label: 'Browse Jobs', path: '/jobs' },
     { label: 'How It Works', path: '/how-it-works' },
   ];
@@ -75,7 +76,7 @@ export class HeaderComponent {
 
   private resolvePrimaryAction(role: UserRole | null): HeaderLink | null {
     if (role === 'Freelancer') {
-      return { label: 'Browse Jobs', path: '/jobs' };
+      return { label: 'Withdraw', path: '/freelancer-dashboard' };
     }
 
     if (role === 'Client' || role === 'Admin') {
