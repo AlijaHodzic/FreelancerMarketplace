@@ -50,6 +50,22 @@ public class BidsController : ControllerBase
         }
     }
 
+    [HttpGet("mine")]
+    [Authorize(Roles = "Freelancer,Admin")]
+    public async Task<ActionResult<IEnumerable<BidResponse>>> GetMine()
+    {
+        try
+        {
+            var freelancerId = GetUserId();
+            var result = await _bidService.GetMineAsync(freelancerId);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
     [HttpPost("{bidId}/accept")]
     [Authorize(Roles = "Client,Admin")]
     public async Task<IActionResult> Accept(Guid bidId)

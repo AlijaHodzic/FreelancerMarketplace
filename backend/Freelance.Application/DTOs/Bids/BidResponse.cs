@@ -8,6 +8,11 @@ public class BidResponse
     public Guid ProjectId { get; set; }
     public Guid FreelancerId { get; set; }
 
+    public string ProjectTitle { get; set; } = string.Empty;
+    public string ProjectDescription { get; set; } = string.Empty;
+    public decimal ProjectBudgetMin { get; set; }
+    public decimal ProjectBudgetMax { get; set; }
+
     public decimal Amount { get; set; }
     public string Message { get; set; } = string.Empty;
 

@@ -9,6 +9,8 @@ import { RegisterComponent } from './features/auth/pages/register/register.compo
 import { JobsComponent } from './features/jobs/pages/jobs/jobs.component';
 import { FreelancerProfileComponent } from './features/marketplace/pages/freelancer-profile/freelancer-profile.component';
 import { FreelancerDashboardComponent } from './features/dashboard/pages/freelancer-dashboard/freelancer-dashboard.component';
+import { FreelancerApplicationsComponent } from './features/dashboard/pages/freelancer-applications/freelancer-applications.component';
+import { ClientDashboardComponent } from './features/dashboard/pages/client-dashboard/client-dashboard.component';
 import {
   clientOnlyGuard,
   freelancerOnlyGuard,
@@ -26,6 +28,8 @@ export const routes: Routes = [
       { path: 'marketplace', component: MarketplaceComponent, canActivate: [marketplaceAccessGuard] },
       { path: 'freelancers/:slug', component: FreelancerProfileComponent, canActivate: [marketplaceAccessGuard] },
       { path: 'freelancer-dashboard', component: FreelancerDashboardComponent, canActivate: [freelancerOnlyGuard] },
+      { path: 'my-applications', component: FreelancerApplicationsComponent, canActivate: [freelancerOnlyGuard] },
+      { path: 'client-dashboard', component: ClientDashboardComponent, canActivate: [clientOnlyGuard] },
       { path: 'jobs', component: JobsComponent, canActivate: [freelancerOrGuestGuard] },
       { path: 'how-it-works', component: HowItWorksComponent },
       { path: 'post-job', component: PostJobComponent, canActivate: [clientOnlyGuard] },

@@ -52,6 +52,10 @@ export class AuthService {
       return '/freelancer-dashboard';
     }
 
+    if (role === 'Client' || role === 'Admin') {
+      return '/client-dashboard';
+    }
+
     return '/marketplace';
   }
 

@@ -34,6 +34,7 @@ export class HeaderComponent {
 
   private readonly clientNavLinks: HeaderLink[] = [
     { label: 'Home', path: '/' },
+    { label: 'My Jobs', path: '/client-dashboard' },
     { label: 'Find Freelancers', path: '/marketplace' },
     { label: 'How It Works', path: '/how-it-works' },
     { label: 'Post a Job', path: '/post-job' },
@@ -42,6 +43,7 @@ export class HeaderComponent {
   private readonly freelancerNavLinks: HeaderLink[] = [
     { label: 'Home', path: '/' },
     { label: 'Dashboard', path: '/freelancer-dashboard' },
+    { label: 'My Applications', path: '/my-applications' },
     { label: 'Browse Jobs', path: '/jobs' },
     { label: 'How It Works', path: '/how-it-works' },
   ];

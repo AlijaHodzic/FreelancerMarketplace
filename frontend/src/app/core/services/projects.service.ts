@@ -11,6 +11,10 @@ export class ProjectsService {
     return this.http.get<Project[]>(`${API_BASE_URL}/projects`);
   }
 
+  getMine() {
+    return this.http.get<Project[]>(`${API_BASE_URL}/projects/mine`);
+  }
+
   create(payload: CreateProjectRequest) {
     return this.http.post<Project>(`${API_BASE_URL}/projects`, payload);
   }

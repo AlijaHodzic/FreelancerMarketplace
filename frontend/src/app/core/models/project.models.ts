@@ -20,3 +20,17 @@ export interface CreateBidRequest {
   amount: number;
   message: string;
 }
+
+export interface Bid {
+  id: string;
+  projectId: string;
+  freelancerId: string;
+  projectTitle: string;
+  projectDescription: string;
+  projectBudgetMin: number;
+  projectBudgetMax: number;
+  amount: number;
+  message: string;
+  status: 'Pending' | 'Accepted' | 'Rejected';
+  createdAtUtc: string;
+}

@@ -7,8 +7,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Freelance.Infrastructure.Services;
 
-
-
 public class BidService : IBidService
 {
     private readonly AppDbContext _db;
@@ -45,7 +43,7 @@ public class BidService : IBidService
         _db.Bids.Add(bid);
         await _db.SaveChangesAsync();
 
-        return MapToResponse(bid);
+        return MapToResponse(bid, project);
     }
 
     public async Task<IEnumerable<BidResponse>> GetByProjectAsync(Guid projectId, Guid requesterId)
@@ -59,11 +57,23 @@ public class BidService : IBidService
         if (project.OwnerId != requesterId)
             throw new InvalidOperationException("Access denied");
 
-        return await _db.Bids
+        var bids = await _db.Bids
             .Where(b => b.ProjectId == projectId)
             .OrderBy(b => b.CreatedAtUtc)
-            .Select(b => MapToResponse(b))
             .ToListAsync();
+
+        return bids.Select(b => MapToResponse(b, project));
+    }
+
+    public async Task<IEnumerable<BidResponse>> GetMineAsync(Guid freelancerId)
+    {
+        var bids = await _db.Bids
+            .Include(b => b.Project)
+            .Where(b => b.FreelancerId == freelancerId)
+            .OrderByDescending(b => b.CreatedAtUtc)
+            .ToListAsync();
+
+        return bids.Select(b => MapToResponse(b, b.Project));
     }
 
     public async Task AcceptAsync(Guid bidId, Guid ownerId)
@@ -107,13 +117,17 @@ public class BidService : IBidService
         await _db.SaveChangesAsync();
     }
 
-    private static BidResponse MapToResponse(Bid bid)
+    private static BidResponse MapToResponse(Bid bid, Project project)
     {
         return new BidResponse
         {
             Id = bid.Id,
             ProjectId = bid.ProjectId,
             FreelancerId = bid.FreelancerId,
+            ProjectTitle = project.Title,
+            ProjectDescription = project.Description,
+            ProjectBudgetMin = project.BudgetMin,
+            ProjectBudgetMax = project.BudgetMax,
             Amount = bid.Amount,
             Message = bid.Message,
             Status = bid.Status,
