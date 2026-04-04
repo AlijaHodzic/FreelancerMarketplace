@@ -22,11 +22,30 @@ public class UserConfig : IEntityTypeConfiguration<User>
             .HasMaxLength(200)
             .IsRequired();
 
+        b.Property(x => x.Slug)
+            .HasMaxLength(200)
+            .HasDefaultValue(string.Empty)
+            .IsRequired();
+
+        b.HasIndex(x => x.Slug)
+            .IsUnique();
+
         b.Property(x => x.PasswordHash)
             .IsRequired();
 
-        b.Property(x => x.CreatedAtUtc).IsRequired();
+        b.Property(x => x.Headline).HasMaxLength(200).HasDefaultValue(string.Empty).IsRequired();
+        b.Property(x => x.AvatarUrl).HasMaxLength(500).HasDefaultValue(string.Empty).IsRequired();
+        b.Property(x => x.Location).HasMaxLength(200).HasDefaultValue(string.Empty).IsRequired();
+        b.Property(x => x.Category).HasMaxLength(120).HasDefaultValue(string.Empty).IsRequired();
+        b.Property(x => x.ExperienceLevel).HasMaxLength(120).HasDefaultValue(string.Empty).IsRequired();
+        b.Property(x => x.ResponseTime).HasMaxLength(120).HasDefaultValue(string.Empty).IsRequired();
+        b.Property(x => x.SuccessRate).HasMaxLength(50).HasDefaultValue(string.Empty).IsRequired();
+        b.Property(x => x.ShortDescription).HasMaxLength(500).HasDefaultValue(string.Empty).IsRequired();
+        b.Property(x => x.About).HasMaxLength(4000).HasDefaultValue(string.Empty).IsRequired();
+        b.Property(x => x.SkillsJson).HasDefaultValue("[]").IsRequired();
+        b.Property(x => x.PortfolioJson).HasDefaultValue("[]").IsRequired();
+        b.Property(x => x.TestimonialsJson).HasDefaultValue("[]").IsRequired();
 
-        
+        b.Property(x => x.CreatedAtUtc).IsRequired();
     }
 }

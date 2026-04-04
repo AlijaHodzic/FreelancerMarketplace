@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: freelance-marketplace-api
+    runtime: dotnet
+    rootDir: backend/Freelance.Api
+    buildCommand: dotnet build
+    startCommand: dotnet run --no-build
+    healthCheckPath: /health
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: ALLOW_DESTRUCTIVE_DB_RESET
+        value: true
+      - key: Cors__AllowedOrigins
+        value: https://your-vercel-project.vercel.app
+      - key: Jwt__Issuer
+        value: Freelance.Api
+      - key: Jwt__Audience
+        value: Freelance.Client
+      - key: Jwt__Key
+        generateValue: true
+    disk:
+      name: freelance-db
+      mountPath: /opt/render/project/src/backend/Freelance.Api
+      sizeGB: 1

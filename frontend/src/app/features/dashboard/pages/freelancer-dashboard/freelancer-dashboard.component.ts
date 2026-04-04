@@ -1,103 +1,207 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CurrencyPipe, NgClass, NgFor, NgIf } from '@angular/common';
+import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { catchError, finalize, forkJoin, of } from 'rxjs';
 import { AuthService } from '../../../../core/auth/auth.service';
-
-interface EarningsPoint {
-  month: string;
-  amount: number;
-}
-
-interface ContractSummary {
-  client: string;
-  project: string;
-  status: string;
-  amount: number;
-  deliveredAt: string;
-}
-
-interface PayoutMethod {
-  provider: string;
-  email: string;
-  status: string;
-  accentClass: string;
-}
+import { FreelancerPortfolioItem, FreelancerProfile } from '../../../../core/models/freelancer.models';
+import { Bid } from '../../../../core/models/project.models';
+import { BidsService } from '../../../../core/services/bids.service';
+import { FreelancersService } from '../../../../core/services/freelancers.service';
+import { NotificationsService } from '../../../../core/services/notifications.service';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-freelancer-dashboard',
   standalone: true,
-  imports: [NgIf, NgFor, NgClass, CurrencyPipe],
+  imports: [NgIf, NgFor, NgClass, CurrencyPipe, FormsModule, ReactiveFormsModule, RouterLink],
   templateUrl: './freelancer-dashboard.component.html',
   styleUrl: './freelancer-dashboard.component.scss',
 })
-export class FreelancerDashboardComponent {
+export class FreelancerDashboardComponent implements OnInit {
   private readonly authService = inject(AuthService);
+  private readonly freelancersService = inject(FreelancersService);
+  private readonly bidsService = inject(BidsService);
+  private readonly notificationsService = inject(NotificationsService);
+  private readonly formBuilder = inject(FormBuilder);
 
   readonly user = this.authService.user;
+  readonly profile = signal<FreelancerProfile | null>(null);
+  readonly bids = signal<Bid[]>([]);
+  readonly loading = signal(true);
+  readonly saving = signal(false);
+  readonly editOpen = signal(false);
+  readonly errorMessage = signal('');
+  readonly successMessage = signal('');
 
-  readonly earnings: EarningsPoint[] = [
-    { month: 'Oct', amount: 2100 },
-    { month: 'Nov', amount: 2900 },
-    { month: 'Dec', amount: 3600 },
-    { month: 'Jan', amount: 4100 },
-    { month: 'Feb', amount: 3900 },
-    { month: 'Mar', amount: 4700 },
-  ];
+  readonly profileForm = this.formBuilder.nonNullable.group({
+    fullName: ['', [Validators.required, Validators.minLength(2)]],
+    headline: ['', [Validators.required, Validators.minLength(3)]],
+    avatar: ['', [Validators.required, Validators.minLength(8)]],
+    location: ['', [Validators.required, Validators.minLength(2)]],
+    category: ['', [Validators.required, Validators.minLength(2)]],
+    experience: ['', [Validators.required, Validators.minLength(2)]],
+    responseTime: ['', [Validators.required, Validators.minLength(2)]],
+    successRate: ['', [Validators.required, Validators.minLength(2)]],
+    completedProjects: [0, [Validators.required, Validators.min(0)]],
+    hourlyRate: [25, [Validators.required, Validators.min(1)]],
+    description: ['', [Validators.required, Validators.minLength(12)]],
+    about: ['', [Validators.required, Validators.minLength(24)]],
+    skillsText: ['', [Validators.required, Validators.minLength(2)]],
+  });
 
-  readonly activeContracts: ContractSummary[] = [
-    {
-      client: 'Nova Commerce',
-      project: 'Homepage refresh and conversion cleanup',
-      status: 'In review',
-      amount: 1500,
-      deliveredAt: '2 days ago',
-    },
-    {
-      client: 'Metric Labs',
-      project: 'Analytics dashboard revamp',
-      status: 'Milestone funded',
-      amount: 2200,
-      deliveredAt: 'This week',
-    },
-    {
-      client: 'Atlas Mobile',
-      project: 'Client portal integration',
-      status: 'Completed',
-      amount: 980,
-      deliveredAt: 'Last week',
-    },
-  ];
+  readonly portfolioItems = signal<FreelancerPortfolioItem[]>([]);
+  readonly activeContracts = computed(() => this.bids().filter((bid) => bid.status === 'Accepted'));
+  readonly pendingApplications = computed(() => this.bids().filter((bid) => bid.status === 'Pending').length);
+  readonly profileCompletion = computed(() => {
+    const profile = this.profile();
+    if (!profile) {
+      return 0;
+    }
 
-  readonly payoutMethods: PayoutMethod[] = [
-    {
-      provider: 'Payoneer',
-      email: 'freelancer@payoneer.com',
-      status: 'Primary',
-      accentClass: 'bg-orange-50 text-orange-600 border-orange-100',
-    },
-    {
-      provider: 'PayPal',
-      email: 'freelancer@paypal.com',
-      status: 'Connected',
-      accentClass: 'bg-sky-50 text-sky-600 border-sky-100',
-    },
-  ];
+    const checks = [
+      profile.avatar,
+      profile.title,
+      profile.location,
+      profile.category,
+      profile.description,
+      profile.about,
+      profile.skills.length > 0 ? 'yes' : '',
+      profile.portfolio.length > 0 ? 'yes' : '',
+    ];
 
-  readonly recentTransactions = [
-    { label: 'Funds cleared from Nova Commerce', amount: 1500, meta: 'Available for withdrawal' },
-    { label: 'Processing fee', amount: -45, meta: 'Marketplace fee' },
-    { label: 'Withdrawal to Payoneer', amount: -1200, meta: 'Completed yesterday' },
-    { label: 'Milestone funded by Metric Labs', amount: 2200, meta: 'Pending release' },
-  ];
+    return Math.round((checks.filter(Boolean).length / checks.length) * 100);
+  });
 
-  readonly totalEarned = this.earnings.reduce((sum, item) => sum + item.amount, 0);
-  readonly availableForWithdrawal = 2850;
-  readonly pendingClearance = 2200;
-  readonly thisMonthGrowth = '+18%';
-  readonly maxBarValue = Math.max(...this.earnings.map((item) => item.amount));
+  ngOnInit() {
+    this.loadDashboard();
+  }
 
-  readonly averageMonthlyRevenue = computed(() => Math.round(this.totalEarned / this.earnings.length));
+  openEdit() {
+    const profile = this.profile();
+    if (!profile) {
+      return;
+    }
 
-  barHeight(amount: number) {
-    return `${Math.max((amount / this.maxBarValue) * 100, 14)}%`;
+    this.profileForm.reset({
+      fullName: profile.name,
+      headline: profile.title,
+      avatar: profile.avatar,
+      location: profile.location,
+      category: profile.category,
+      experience: profile.experience,
+      responseTime: profile.responseTime,
+      successRate: profile.successRate,
+      completedProjects: profile.completedProjects,
+      hourlyRate: profile.hourlyRate,
+      description: profile.description,
+      about: profile.about,
+      skillsText: profile.skills.join(', '),
+    });
+    this.portfolioItems.set(profile.portfolio.map((item) => ({ ...item, tags: [...item.tags] })));
+    this.editOpen.set(true);
+    this.errorMessage.set('');
+    this.successMessage.set('');
+  }
+
+  closeEdit() {
+    this.editOpen.set(false);
+  }
+
+  addPortfolioItem() {
+    this.portfolioItems.update((items) => [...items, { title: '', summary: '', image: '', tags: [] }]);
+  }
+
+  removePortfolioItem(index: number) {
+    this.portfolioItems.update((items) => items.filter((_, itemIndex) => itemIndex !== index));
+  }
+
+  updatePortfolioField(index: number, field: keyof FreelancerPortfolioItem, value: string) {
+    this.portfolioItems.update((items) =>
+      items.map((item, itemIndex) =>
+        itemIndex === index
+          ? {
+              ...item,
+              [field]:
+                field === 'tags'
+                  ? value
+                      .split(',')
+                      .map((tag) => tag.trim())
+                      .filter(Boolean)
+                  : value,
+            }
+          : item,
+      ),
+    );
+  }
+
+  saveProfile() {
+    if (this.profileForm.invalid) {
+      this.profileForm.markAllAsTouched();
+      return;
+    }
+
+    this.saving.set(true);
+    this.errorMessage.set('');
+    this.successMessage.set('');
+
+    const formValue = this.profileForm.getRawValue();
+    this.freelancersService
+      .updateMineProfile({
+        fullName: formValue.fullName.trim(),
+        headline: formValue.headline.trim(),
+        avatar: formValue.avatar.trim(),
+        location: formValue.location.trim(),
+        category: formValue.category.trim(),
+        experience: formValue.experience.trim(),
+        responseTime: formValue.responseTime.trim(),
+        successRate: formValue.successRate.trim(),
+        completedProjects: formValue.completedProjects,
+        hourlyRate: formValue.hourlyRate,
+        description: formValue.description.trim(),
+        about: formValue.about.trim(),
+        skills: formValue.skillsText
+          .split(',')
+          .map((skill) => skill.trim())
+          .filter(Boolean),
+        portfolio: this.portfolioItems(),
+      })
+      .pipe(
+        finalize(() => this.saving.set(false)),
+        catchError((error) => {
+          this.errorMessage.set(error.error?.message ?? 'We could not save your profile right now.');
+          return of(null);
+        }),
+      )
+      .subscribe((profile) => {
+        if (!profile) {
+          return;
+        }
+
+        this.profile.set(profile);
+        this.authService.updateCurrentUser({ fullName: profile.name });
+        this.editOpen.set(false);
+        this.successMessage.set('Profile updated successfully.');
+      });
+  }
+
+  private loadDashboard() {
+    this.loading.set(true);
+    this.errorMessage.set('');
+
+    forkJoin({
+      profile: this.freelancersService.getMineProfile().pipe(catchError(() => of(null))),
+      bids: this.bidsService.getMine().pipe(catchError(() => of([] as Bid[]))),
+      notifications: this.notificationsService.loadSummary(),
+    })
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe(({ profile, bids }) => {
+        if (!profile) {
+          this.errorMessage.set('We could not load your freelancer workspace right now.');
+          return;
+        }
+
+        this.profile.set(profile);
+        this.bids.set(bids);
+      });
   }
 }

@@ -59,6 +59,21 @@ export class AuthService {
     return '/marketplace';
   }
 
+  updateCurrentUser(patch: Partial<AuthUser>) {
+    const session = this.sessionState();
+    if (!session) {
+      return;
+    }
+
+    this.storeSession({
+      ...session,
+      user: {
+        ...session.user,
+        ...patch,
+      },
+    });
+  }
+
   private storeSession(session: AuthSession) {
     this.sessionState.set(session);
 

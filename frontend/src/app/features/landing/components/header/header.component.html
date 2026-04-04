@@ -26,6 +26,23 @@
 
       <div class="ml-auto flex items-center space-x-2 sm:space-x-3">
         <ng-container *ngIf="isAuthenticated(); else guestActions">
+          <a
+            routerLink="/notifications"
+            class="relative inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-900"
+            aria-label="Open notifications"
+          >
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 1 0-12 0v3.2a2 2 0 0 1-.6 1.4L4 17h5"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 17a3 3 0 0 0 6 0"></path>
+            </svg>
+            <span
+              *ngIf="unreadNotifications()"
+              class="absolute -right-1 -top-1 inline-flex min-h-5 min-w-5 items-center justify-center rounded-full bg-rose-500 px-1.5 text-[11px] font-semibold text-white"
+            >
+              {{ unreadNotifications() > 9 ? '9+' : unreadNotifications() }}
+            </span>
+          </a>
+
           <div class="hidden md:flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-2">
             <div class="mr-3 h-9 w-9 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-sm font-semibold">
               {{ user()?.fullName?.charAt(0) }}
@@ -115,6 +132,18 @@
           class="text-left px-4 py-2 text-sm font-medium text-white bg-indigo-500 hover:bg-indigo-600 transition-colors rounded-lg"
         >
           {{ action.label }}
+        </a>
+
+        <a
+          *ngIf="isAuthenticated()"
+          routerLink="/notifications"
+          (click)="closeMobileMenu()"
+          class="text-left px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors rounded-lg"
+        >
+          Notifications
+          <span *ngIf="unreadNotifications()" class="ml-2 rounded-full bg-rose-500 px-2 py-0.5 text-xs font-semibold text-white">
+            {{ unreadNotifications() > 9 ? '9+' : unreadNotifications() }}
+          </span>
         </a>
 
         <a

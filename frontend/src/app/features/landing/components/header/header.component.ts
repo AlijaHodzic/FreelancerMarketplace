@@ -1,8 +1,9 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { NgFor, NgIf } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../../../core/auth/auth.service';
 import { UserRole } from '../../../../core/models/auth.models';
+import { NotificationsService } from '../../../../core/services/notifications.service';
 
 interface HeaderLink {
   label: string;
@@ -18,11 +19,13 @@ interface HeaderLink {
 })
 export class HeaderComponent {
   private readonly authService = inject(AuthService);
+  private readonly notificationsService = inject(NotificationsService);
 
   readonly mobileMenuOpen = signal(false);
   readonly user = this.authService.user;
   readonly role = this.authService.role;
   readonly isAuthenticated = this.authService.isAuthenticated;
+  readonly unreadNotifications = this.notificationsService.unreadCount;
 
   private readonly guestNavLinks: HeaderLink[] = [
     { label: 'Home', path: '/' },
@@ -35,6 +38,8 @@ export class HeaderComponent {
   private readonly clientNavLinks: HeaderLink[] = [
     { label: 'Home', path: '/' },
     { label: 'My Jobs', path: '/client-dashboard' },
+    { label: 'Saved', path: '/saved-freelancers' },
+    { label: 'Inbox', path: '/messages' },
     { label: 'Find Freelancers', path: '/marketplace' },
     { label: 'How It Works', path: '/how-it-works' },
     { label: 'Post a Job', path: '/post-job' },
@@ -44,12 +49,24 @@ export class HeaderComponent {
     { label: 'Home', path: '/' },
     { label: 'Dashboard', path: '/freelancer-dashboard' },
     { label: 'My Applications', path: '/my-applications' },
+    { label: 'Inbox', path: '/messages' },
     { label: 'Browse Jobs', path: '/jobs' },
     { label: 'How It Works', path: '/how-it-works' },
   ];
 
   readonly navLinks = computed(() => this.resolveNavLinks(this.role()));
   readonly primaryAction = computed(() => this.resolvePrimaryAction(this.role()));
+
+  constructor() {
+    effect(() => {
+      if (this.isAuthenticated()) {
+        this.notificationsService.loadSummary().subscribe();
+        return;
+      }
+
+      this.notificationsService.clear();
+    });
+  }
 
   toggleMobileMenu() {
     this.mobileMenuOpen.update((isOpen) => !isOpen);

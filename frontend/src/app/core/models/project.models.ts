@@ -1,14 +1,30 @@
 export interface Project {
   id: string;
+  ownerId: string;
   title: string;
   description: string;
   budgetMin: number;
   budgetMax: number;
-  status: 'Open' | 'InProgress' | 'Completed' | 'Cancelled';
+  status: 'Draft' | 'Open' | 'InProgress' | 'Completed' | 'Cancelled';
+  assignedFreelancerId: string | null;
+  assignedFreelancerName: string;
+  assignedFreelancerEmail: string;
+  hiredAtUtc: string | null;
+  completedAtUtc: string | null;
+  canReview: boolean;
+  hasReview: boolean;
   createdAtUtc: string;
 }
 
 export interface CreateProjectRequest {
+  title: string;
+  description: string;
+  budgetMin: number;
+  budgetMax: number;
+}
+
+export interface HireFreelancerRequest {
+  freelancerId: string;
   title: string;
   description: string;
   budgetMin: number;
@@ -25,6 +41,11 @@ export interface Bid {
   id: string;
   projectId: string;
   freelancerId: string;
+  freelancerName: string;
+  freelancerEmail: string;
+  clientId: string;
+  clientName: string;
+  clientEmail: string;
   projectTitle: string;
   projectDescription: string;
   projectBudgetMin: number;

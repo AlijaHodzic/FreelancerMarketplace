@@ -11,7 +11,11 @@ import { FreelancerProfileComponent } from './features/marketplace/pages/freelan
 import { FreelancerDashboardComponent } from './features/dashboard/pages/freelancer-dashboard/freelancer-dashboard.component';
 import { FreelancerApplicationsComponent } from './features/dashboard/pages/freelancer-applications/freelancer-applications.component';
 import { ClientDashboardComponent } from './features/dashboard/pages/client-dashboard/client-dashboard.component';
+import { MessagesComponent } from './features/messages/pages/messages/messages.component';
+import { NotificationsComponent } from './features/notifications/pages/notifications/notifications.component';
+import { FavoriteFreelancersComponent } from './features/favorites/pages/favorite-freelancers/favorite-freelancers.component';
 import {
+  authenticatedOnlyGuard,
   clientOnlyGuard,
   freelancerOnlyGuard,
   freelancerOrGuestGuard,
@@ -30,6 +34,9 @@ export const routes: Routes = [
       { path: 'freelancer-dashboard', component: FreelancerDashboardComponent, canActivate: [freelancerOnlyGuard] },
       { path: 'my-applications', component: FreelancerApplicationsComponent, canActivate: [freelancerOnlyGuard] },
       { path: 'client-dashboard', component: ClientDashboardComponent, canActivate: [clientOnlyGuard] },
+      { path: 'saved-freelancers', component: FavoriteFreelancersComponent, canActivate: [clientOnlyGuard] },
+      { path: 'messages', component: MessagesComponent, canActivate: [authenticatedOnlyGuard] },
+      { path: 'notifications', component: NotificationsComponent, canActivate: [authenticatedOnlyGuard] },
       { path: 'jobs', component: JobsComponent, canActivate: [freelancerOrGuestGuard] },
       { path: 'how-it-works', component: HowItWorksComponent },
       { path: 'post-job', component: PostJobComponent, canActivate: [clientOnlyGuard] },

@@ -13,18 +13,32 @@ const browserDistFolder = resolve(serverDistFolder, '../browser');
 
 const app = express();
 const angularApp = new AngularNodeAppEngine();
+const backendApiBaseUrl = process.env['API_PROXY_TARGET'] || 'http://localhost:5005';
 
 /**
- * Example Express Rest API endpoints can be defined here.
- * Uncomment and define endpoints as necessary.
- *
- * Example:
- * ```ts
- * app.get('/api/**', (req, res) => {
- *   // Handle API request
- * });
- * ```
+ * Proxy API requests during SSR/prerender so production builds can still
+ * resolve marketplace data when the frontend uses a relative /api path.
  */
+app.use('/api/**', async (req, res) => {
+  try {
+    const targetUrl = new URL(req.originalUrl, backendApiBaseUrl);
+    const response = await fetch(targetUrl, {
+      method: req.method,
+      headers: {
+        accept: req.headers.accept ?? 'application/json',
+        'content-type': req.headers['content-type'] ?? 'application/json',
+      },
+    });
+
+    const body = await response.text();
+    res.status(response.status);
+    response.headers.forEach((value, key) => res.setHeader(key, value));
+    res.send(body);
+  } catch (error) {
+    console.error('API proxy failed:', error);
+    res.status(502).json({ message: 'API proxy failed during SSR.' });
+  }
+});
 
 /**
  * Serve static files from /browser

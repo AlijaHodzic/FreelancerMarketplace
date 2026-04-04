@@ -28,6 +28,17 @@ export const clientOnlyGuard: CanActivateFn = () => {
   return true;
 };
 
+export const authenticatedOnlyGuard: CanActivateFn = () => {
+  const authService = inject(AuthService);
+  const router = inject(Router);
+
+  if (!authService.isAuthenticated()) {
+    return router.createUrlTree(['/login']);
+  }
+
+  return true;
+};
+
 export const freelancerOnlyGuard: CanActivateFn = () => {
   const authService = inject(AuthService);
   const router = inject(Router);

@@ -55,6 +55,34 @@ namespace Freelance.Api.Controllers
             }
         }
 
+        [HttpPost("hire")]
+        [Authorize(Roles = "Client,Admin")]
+        public async Task<IActionResult> Hire([FromBody] HireFreelancerRequest request)
+        {
+            try
+            {
+                return Ok(await _service.HireFreelancerAsync(UserId, request));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpPost("{id:guid}/complete")]
+        [Authorize(Roles = "Client,Admin")]
+        public async Task<IActionResult> Complete(Guid id)
+        {
+            try
+            {
+                return Ok(await _service.CompleteAsync(UserId, id));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
         [HttpPut("{id:guid}")]
         [Authorize(Roles = "Client,Admin")]
         public async Task<IActionResult> Update(Guid id, UpdateProjectRequest request)

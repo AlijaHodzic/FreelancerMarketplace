@@ -5,6 +5,7 @@ namespace Freelance.Domain.Enums
         Draft = 1,
         Open = 2,
         InProgress = 3,
-        Closed = 4
+        Completed = 4,
+        Cancelled = 5
     }
 }

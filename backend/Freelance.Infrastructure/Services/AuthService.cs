@@ -29,12 +29,23 @@ namespace Freelance.Infrastructure.Services
             if (request.Role is not UserRole.Client and not UserRole.Freelancer)
                 throw new Exception("Only client and freelancer accounts can be registered");
 
+            var fullName = request.FullName.Trim();
+            var slug = await GenerateUniqueSlugAsync(fullName);
+
             var user = new User
             {
                 Email = normalizedEmail,
-                FullName = request.FullName.Trim(),
+                FullName = fullName,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
-                Role = request.Role
+                Role = request.Role,
+                Slug = slug,
+                Headline = request.Role == UserRole.Freelancer ? "New Freelancer" : "Client",
+                ShortDescription = request.Role == UserRole.Freelancer
+                    ? "New freelancer profile. Complete your profile to start attracting better projects."
+                    : "New client account ready to post projects and hire freelancers.",
+                About = request.Role == UserRole.Freelancer
+                    ? "Tell clients about your experience, tools, and the kind of work you do best."
+                    : "Client account ready to publish projects and manage proposals.",
             };
 
             _db.Users.Add(user);
@@ -121,6 +132,32 @@ namespace Freelance.Infrastructure.Services
                     Role = user.Role
                 }
             };
+        }
+
+        private async Task<string> GenerateUniqueSlugAsync(string fullName)
+        {
+            var baseSlug = string.Join(
+                "-",
+                fullName
+                    .Trim()
+                    .ToLowerInvariant()
+                    .Split(' ', StringSplitOptions.RemoveEmptyEntries));
+
+            if (string.IsNullOrWhiteSpace(baseSlug))
+            {
+                baseSlug = "user";
+            }
+
+            var slug = baseSlug;
+            var suffix = 2;
+
+            while (await _db.Users.AnyAsync(user => user.Slug == slug))
+            {
+                slug = $"{baseSlug}-{suffix}";
+                suffix++;
+            }
+
+            return slug;
         }
     }
 }

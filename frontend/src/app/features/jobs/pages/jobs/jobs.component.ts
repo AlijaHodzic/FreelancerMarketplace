@@ -1,17 +1,18 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { CurrencyPipe, DatePipe, NgFor, NgIf } from '@angular/common';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { CurrencyPipe, DatePipe, NgClass, NgFor, NgIf } from '@angular/common';
+import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { catchError, finalize, of } from 'rxjs';
 import { AuthService } from '../../../../core/auth/auth.service';
 import { Project } from '../../../../core/models/project.models';
 import { BidsService } from '../../../../core/services/bids.service';
 import { ProjectsService } from '../../../../core/services/projects.service';
+import { getProjectStatusBadge } from '../../../../core/utils/status-badges';
 
 @Component({
   selector: 'app-jobs',
   standalone: true,
-  imports: [NgFor, NgIf, DatePipe, CurrencyPipe, ReactiveFormsModule, RouterLink],
+  imports: [NgFor, NgIf, NgClass, DatePipe, CurrencyPipe, ReactiveFormsModule, FormsModule, RouterLink],
   templateUrl: './jobs.component.html',
   styleUrl: './jobs.component.scss',
 })
@@ -27,8 +28,34 @@ export class JobsComponent implements OnInit {
   readonly errorMessage = signal('');
   readonly successMessage = signal('');
   readonly selectedProjectId = signal<string | null>(null);
+  readonly searchTerm = signal('');
+  readonly sortBy = signal<'latest' | 'budget-high' | 'budget-low'>('latest');
   readonly isFreelancer = computed(() => this.authService.role() === 'Freelancer');
   readonly isGuest = computed(() => !this.authService.isAuthenticated());
+  readonly projectStatusBadge = getProjectStatusBadge;
+
+  readonly filteredProjects = computed(() => {
+    const query = this.searchTerm().trim().toLowerCase();
+    const sortBy = this.sortBy();
+    let projects = this.projects();
+
+    if (query) {
+      projects = projects.filter((project) =>
+        [project.title, project.description, project.status].join(' ').toLowerCase().includes(query),
+      );
+    }
+
+    return [...projects].sort((left, right) => {
+      switch (sortBy) {
+        case 'budget-high':
+          return right.budgetMax - left.budgetMax;
+        case 'budget-low':
+          return left.budgetMin - right.budgetMin;
+        default:
+          return new Date(right.createdAtUtc).getTime() - new Date(left.createdAtUtc).getTime();
+      }
+    });
+  });
 
   readonly proposalForm = this.formBuilder.nonNullable.group({
     amount: [0, [Validators.required, Validators.min(1)]],
