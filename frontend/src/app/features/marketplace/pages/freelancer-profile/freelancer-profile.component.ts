@@ -1,5 +1,5 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { CurrencyPipe, DatePipe, NgClass, NgFor, NgIf } from '@angular/common';
+import { Component, OnInit, PLATFORM_ID, computed, inject, signal } from '@angular/core';
+import { CurrencyPipe, DatePipe, NgClass, NgFor, NgIf, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { catchError, finalize, of } from 'rxjs';
@@ -21,6 +21,7 @@ import { getProfileStatusBadge } from '../../../../core/utils/status-badges';
   styleUrl: './freelancer-profile.component.scss',
 })
 export class FreelancerProfileComponent implements OnInit {
+  private readonly platformId = inject(PLATFORM_ID);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly freelancersService = inject(FreelancersService);
@@ -55,6 +56,10 @@ export class FreelancerProfileComponent implements OnInit {
   readonly profileStatusBadge = getProfileStatusBadge;
 
   ngOnInit() {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
     const slug = this.route.snapshot.paramMap.get('slug');
 
     if (!slug) {

@@ -1,6 +1,6 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, PLATFORM_ID, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { NgClass, NgFor, NgIf } from '@angular/common';
+import { NgClass, NgFor, NgIf, isPlatformBrowser } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { catchError, finalize, of } from 'rxjs';
 import { AuthService } from '../../../../core/auth/auth.service';
@@ -17,6 +17,7 @@ import { getProfileStatusBadge } from '../../../../core/utils/status-badges';
   styleUrl: './marketplace.component.scss',
 })
 export class MarketplaceComponent implements OnInit {
+  private readonly platformId = inject(PLATFORM_ID);
   private readonly freelancersService = inject(FreelancersService);
   private readonly favoriteFreelancersService = inject(FavoriteFreelancersService);
   private readonly authService = inject(AuthService);
@@ -67,6 +68,10 @@ export class MarketplaceComponent implements OnInit {
   });
 
   ngOnInit() {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
     this.freelancersService
       .getAll()
       .pipe(

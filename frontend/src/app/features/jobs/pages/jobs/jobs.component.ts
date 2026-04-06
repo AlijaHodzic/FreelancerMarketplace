@@ -1,5 +1,5 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { CurrencyPipe, DatePipe, NgClass, NgFor, NgIf } from '@angular/common';
+import { Component, OnInit, PLATFORM_ID, computed, inject, signal } from '@angular/core';
+import { CurrencyPipe, DatePipe, NgClass, NgFor, NgIf, isPlatformBrowser } from '@angular/common';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { catchError, finalize, of } from 'rxjs';
@@ -17,6 +17,7 @@ import { getProjectStatusBadge } from '../../../../core/utils/status-badges';
   styleUrl: './jobs.component.scss',
 })
 export class JobsComponent implements OnInit {
+  private readonly platformId = inject(PLATFORM_ID);
   private readonly projectsService = inject(ProjectsService);
   private readonly bidsService = inject(BidsService);
   private readonly authService = inject(AuthService);
@@ -63,6 +64,10 @@ export class JobsComponent implements OnInit {
   });
 
   ngOnInit() {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
     this.loadProjects();
   }
 

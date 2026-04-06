@@ -25,7 +25,7 @@
       {{ errorMessage() }}
     </div>
 
-    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
+    <div *ngIf="!loading()" class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
       <p class="text-sm text-slate-600"><span class="font-semibold text-slate-900">{{ filteredFreelancers().length }}</span> freelancers found</p>
       <div class="flex items-center gap-3">
         <div class="hidden md:flex flex-wrap gap-2">
