@@ -160,16 +160,6 @@ For the demo environment:
 - Preparing a portfolio project for cloud deployment
 - Debugging SSR, API proxying, and deployment issues in a production-like setup
 
-## CV-Friendly Highlights
-
-If you want to describe this project on your CV, you can reuse points like:
-
-- Built a full-stack freelance marketplace using Angular and ASP.NET Core with JWT authentication and role-based dashboards
-- Designed and implemented live marketplace flows including proposals, direct hire, shortlist/favorites, messaging, reviews, and notifications
-- Replaced mock frontend data with API-backed data models and seeded demo content in SQLite
-- Deployed the application using Vercel for the frontend and Render for the backend, including API rewrites and health monitoring
-- Improved local and deployed SSR/API behavior by debugging proxy, routing, and prerender issues
-
 ## Current Status
 
 The project is in a strong demo/portfolio state and is suitable for:
