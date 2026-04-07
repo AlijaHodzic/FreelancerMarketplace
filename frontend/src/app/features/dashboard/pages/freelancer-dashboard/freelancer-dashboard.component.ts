@@ -32,6 +32,7 @@ export class FreelancerDashboardComponent implements OnInit {
   readonly editOpen = signal(false);
   readonly errorMessage = signal('');
   readonly successMessage = signal('');
+  readonly avatarPreview = signal('');
 
   readonly profileForm = this.formBuilder.nonNullable.group({
     fullName: ['', [Validators.required, Validators.minLength(2)]],
@@ -97,6 +98,7 @@ export class FreelancerDashboardComponent implements OnInit {
       about: profile.about,
       skillsText: profile.skills.join(', '),
     });
+    this.avatarPreview.set(profile.avatar);
     this.portfolioItems.set(profile.portfolio.map((item) => ({ ...item, tags: [...item.tags] })));
     this.editOpen.set(true);
     this.errorMessage.set('');
@@ -105,6 +107,54 @@ export class FreelancerDashboardComponent implements OnInit {
 
   closeEdit() {
     this.editOpen.set(false);
+  }
+
+  onAvatarInputChange(value: string) {
+    this.avatarPreview.set(value.trim());
+  }
+
+  onAvatarFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement | null;
+    const file = input?.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    if (!file.type.startsWith('image/')) {
+      this.errorMessage.set('Please choose a valid image file for your profile photo.');
+      input.value = '';
+      return;
+    }
+
+    const maxSizeInBytes = 2 * 1024 * 1024;
+    if (file.size > maxSizeInBytes) {
+      this.errorMessage.set('Profile photo must be smaller than 2 MB.');
+      input.value = '';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = typeof reader.result === 'string' ? reader.result : '';
+      if (!result) {
+        this.errorMessage.set('We could not read that image file. Try a different one.');
+        return;
+      }
+
+      this.profileForm.controls.avatar.setValue(result);
+      this.avatarPreview.set(result);
+      this.errorMessage.set('');
+    };
+    reader.onerror = () => {
+      this.errorMessage.set('We could not read that image file. Try a different one.');
+    };
+    reader.readAsDataURL(file);
+  }
+
+  clearAvatar() {
+    this.profileForm.controls.avatar.setValue('');
+    this.avatarPreview.set('');
   }
 
   addPortfolioItem() {
