@@ -51,6 +51,7 @@ export class FreelancerProfileComponent implements OnInit {
   });
 
   readonly canSaveFreelancers = computed(() => this.authService.role() === 'Client' || this.authService.role() === 'Admin');
+  readonly isAuthenticated = this.authService.isAuthenticated;
   readonly canInvite = this.canSaveFreelancers;
   readonly canHire = this.canSaveFreelancers;
   readonly profileStatusBadge = getProfileStatusBadge;
@@ -143,6 +144,7 @@ export class FreelancerProfileComponent implements OnInit {
   }
 
   openInvite() {
+    this.errorMessage.set('');
     this.inviteOpen.set(true);
     this.selectedProjectId.set(this.projects()[0]?.id ?? '');
   }
@@ -176,6 +178,13 @@ export class FreelancerProfileComponent implements OnInit {
       return;
     }
 
+    this.errorMessage.set('');
+
+    if (!this.isAuthenticated()) {
+      void this.router.navigate(['/login']);
+      return;
+    }
+
     void this.router.navigate(['/messages'], {
       queryParams: {
         recipientEmail: freelancer.email,
@@ -186,6 +195,7 @@ export class FreelancerProfileComponent implements OnInit {
   }
 
   openHireNow() {
+    this.errorMessage.set('');
     this.hireNowOpen.set(true);
     this.inviteOpen.set(false);
   }
