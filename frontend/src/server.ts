@@ -14,6 +14,7 @@ const browserDistFolder = resolve(serverDistFolder, '../browser');
 const app = express();
 const angularApp = new AngularNodeAppEngine();
 const backendApiBaseUrl = process.env['API_PROXY_TARGET'] || 'http://localhost:5005';
+const bodylessMethods = new Set(['GET', 'HEAD']);
 
 /**
  * Proxy API requests during SSR/prerender so production builds can still
@@ -22,12 +23,24 @@ const backendApiBaseUrl = process.env['API_PROXY_TARGET'] || 'http://localhost:5
 app.use('/api/**', async (req, res) => {
   try {
     const targetUrl = new URL(req.originalUrl, backendApiBaseUrl);
+    const requestBody =
+      bodylessMethods.has(req.method.toUpperCase()) || !req.readable
+        ? undefined
+        : await new Promise<Buffer>((resolve, reject) => {
+            const chunks: Buffer[] = [];
+
+            req.on('data', (chunk) => chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk)));
+            req.on('end', () => resolve(Buffer.concat(chunks)));
+            req.on('error', reject);
+          });
+
     const response = await fetch(targetUrl, {
       method: req.method,
       headers: {
         accept: req.headers.accept ?? 'application/json',
         'content-type': req.headers['content-type'] ?? 'application/json',
       },
+      body: requestBody,
     });
 
     const body = await response.text();
