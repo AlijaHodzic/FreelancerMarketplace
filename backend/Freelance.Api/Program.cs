@@ -31,6 +31,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddScoped<IBidService, BidService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IClientProfileService, ClientProfileService>();
 builder.Services.AddScoped<IFavoriteFreelancerService, FavoriteFreelancerService>();
 builder.Services.AddScoped<IFreelancerProfileService, FreelancerProfileService>();
 builder.Services.AddScoped<IMessagingService, MessagingService>();

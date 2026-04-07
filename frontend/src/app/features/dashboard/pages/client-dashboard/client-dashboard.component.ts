@@ -3,8 +3,11 @@ import { CurrencyPipe, DatePipe, NgClass, NgFor, NgIf } from '@angular/common';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { catchError, finalize, forkJoin, of } from 'rxjs';
+import { AuthService } from '../../../../core/auth/auth.service';
+import { ClientProfile } from '../../../../core/models/client-profile.models';
 import { Bid, Project } from '../../../../core/models/project.models';
 import { BidsService } from '../../../../core/services/bids.service';
+import { ClientProfileService } from '../../../../core/services/client-profile.service';
 import { ProjectsService } from '../../../../core/services/projects.service';
 import { ReviewsService } from '../../../../core/services/reviews.service';
 
@@ -20,19 +23,36 @@ interface ClientProjectView extends Project {
   styleUrl: './client-dashboard.component.scss',
 })
 export class ClientDashboardComponent implements OnInit {
+  private readonly authService = inject(AuthService);
+  private readonly clientProfileService = inject(ClientProfileService);
   private readonly projectsService = inject(ProjectsService);
   private readonly bidsService = inject(BidsService);
   private readonly router = inject(Router);
   private readonly reviewsService = inject(ReviewsService);
   private readonly formBuilder = inject(FormBuilder);
 
+  readonly user = this.authService.user;
+  readonly profile = signal<ClientProfile | null>(null);
   readonly projects = signal<ClientProjectView[]>([]);
   readonly loading = signal(true);
+  readonly savingProfile = signal(false);
   readonly actionLoadingId = signal<string | null>(null);
   readonly errorMessage = signal('');
   readonly successMessage = signal('');
   readonly expandedProjectId = signal<string | null>(null);
   readonly reviewProjectId = signal<string | null>(null);
+  readonly editProfileOpen = signal(false);
+  readonly avatarPreview = signal('');
+
+  readonly profileForm = this.formBuilder.nonNullable.group({
+    fullName: ['', [Validators.required, Validators.minLength(2)]],
+    headline: ['', [Validators.required, Validators.minLength(3)]],
+    avatar: ['', [Validators.required, Validators.minLength(8)]],
+    location: ['', [Validators.required, Validators.minLength(2)]],
+    companyName: ['', [Validators.required, Validators.minLength(2)]],
+    companyDescription: ['', [Validators.required, Validators.minLength(12)]],
+    about: ['', [Validators.required, Validators.minLength(20)]],
+  });
 
   readonly reviewForm = this.formBuilder.nonNullable.group({
     rating: [5, [Validators.required, Validators.min(1), Validators.max(5)]],
@@ -43,6 +63,119 @@ export class ClientDashboardComponent implements OnInit {
 
   ngOnInit() {
     this.loadProjects();
+  }
+
+  openProfileEdit() {
+    const profile = this.profile();
+    if (!profile) {
+      return;
+    }
+
+    this.profileForm.reset({
+      fullName: profile.fullName,
+      headline: profile.headline,
+      avatar: profile.avatar,
+      location: profile.location,
+      companyName: profile.companyName,
+      companyDescription: profile.companyDescription,
+      about: profile.about,
+    });
+    this.avatarPreview.set(profile.avatar);
+    this.editProfileOpen.set(true);
+    this.errorMessage.set('');
+    this.successMessage.set('');
+  }
+
+  closeProfileEdit() {
+    this.editProfileOpen.set(false);
+  }
+
+  onAvatarInputChange(value: string) {
+    this.avatarPreview.set(value.trim());
+  }
+
+  onAvatarFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement | null;
+    const file = input?.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    if (!file.type.startsWith('image/')) {
+      this.errorMessage.set('Please choose a valid image file for your client profile photo.');
+      input.value = '';
+      return;
+    }
+
+    const maxSizeInBytes = 2 * 1024 * 1024;
+    if (file.size > maxSizeInBytes) {
+      this.errorMessage.set('Profile photo must be smaller than 2 MB.');
+      input.value = '';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = typeof reader.result === 'string' ? reader.result : '';
+      if (!result) {
+        this.errorMessage.set('We could not read that image file. Try a different one.');
+        return;
+      }
+
+      this.profileForm.controls.avatar.setValue(result);
+      this.avatarPreview.set(result);
+      this.errorMessage.set('');
+    };
+    reader.onerror = () => {
+      this.errorMessage.set('We could not read that image file. Try a different one.');
+    };
+    reader.readAsDataURL(file);
+  }
+
+  clearAvatar() {
+    this.profileForm.controls.avatar.setValue('');
+    this.avatarPreview.set('');
+  }
+
+  saveProfile() {
+    if (this.profileForm.invalid) {
+      this.profileForm.markAllAsTouched();
+      return;
+    }
+
+    this.savingProfile.set(true);
+    this.errorMessage.set('');
+    this.successMessage.set('');
+
+    this.clientProfileService
+      .updateMineProfile({
+        ...this.profileForm.getRawValue(),
+        fullName: this.profileForm.controls.fullName.value.trim(),
+        headline: this.profileForm.controls.headline.value.trim(),
+        avatar: this.profileForm.controls.avatar.value.trim(),
+        location: this.profileForm.controls.location.value.trim(),
+        companyName: this.profileForm.controls.companyName.value.trim(),
+        companyDescription: this.profileForm.controls.companyDescription.value.trim(),
+        about: this.profileForm.controls.about.value.trim(),
+      })
+      .pipe(
+        finalize(() => this.savingProfile.set(false)),
+        catchError((error) => {
+          this.errorMessage.set(error.error?.message ?? 'We could not save your client profile right now.');
+          return of(null);
+        }),
+      )
+      .subscribe((profile) => {
+        if (!profile) {
+          return;
+        }
+
+        this.profile.set(profile);
+        this.authService.updateCurrentUser({ fullName: profile.fullName });
+        this.editProfileOpen.set(false);
+        this.successMessage.set('Client profile updated successfully.');
+      });
   }
 
   toggleProject(projectId: string) {
@@ -142,33 +275,35 @@ export class ClientDashboardComponent implements OnInit {
     this.loading.set(true);
     this.errorMessage.set('');
 
-    this.projectsService
-      .getMine()
-      .pipe(
+    forkJoin({
+      profile: this.clientProfileService.getMineProfile().pipe(catchError(() => of(null))),
+      projects: this.projectsService.getMine().pipe(
         catchError((error) => {
           this.errorMessage.set(error.error?.message ?? 'We could not load your jobs right now.');
           return of([] as Project[]);
         }),
-      )
-      .subscribe((projects) => {
-        if (!projects.length) {
-          this.projects.set([]);
-          this.loading.set(false);
-          return;
-        }
+      ),
+    }).subscribe(({ profile, projects }) => {
+      this.profile.set(profile);
 
-        forkJoin(
-          projects.map((project) =>
-            this.bidsService.getByProject(project.id).pipe(
-              catchError(() => of([] as Bid[])),
-            ),
+      if (!projects.length) {
+        this.projects.set([]);
+        this.loading.set(false);
+        return;
+      }
+
+      forkJoin(
+        projects.map((project) =>
+          this.bidsService.getByProject(project.id).pipe(
+            catchError(() => of([] as Bid[])),
           ),
-        )
-          .pipe(finalize(() => this.loading.set(false)))
-          .subscribe((projectBids) => {
-            this.projects.set(projects.map((project, index) => ({ ...project, bids: projectBids[index] })));
-          });
-      });
+        ),
+      )
+        .pipe(finalize(() => this.loading.set(false)))
+        .subscribe((projectBids) => {
+          this.projects.set(projects.map((project, index) => ({ ...project, bids: projectBids[index] })));
+        });
+    });
   }
 
   private handleBidAction(projectId: string, bidId: string, action: 'accept' | 'reject') {
