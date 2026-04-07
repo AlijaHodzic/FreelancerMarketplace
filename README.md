@@ -15,6 +15,56 @@ This project was built as a portfolio piece to demonstrate end-to-end product th
 - Client: `hello@novacommerce.demo` / `Pass1234`
 - Freelancer: `alex.rivera@freelancehub.demo` / `Pass1234`
 
+## Product Screenshots
+
+### Landing Page
+
+![Landing page](docs/screenshots/landing-page.png)
+
+The public landing experience introduces the marketplace, highlights the value proposition, and guides visitors into the main browse flows.
+
+### Freelancer Marketplace
+
+![Freelancer marketplace](docs/screenshots/marketplace.png)
+
+Clients can browse live freelancer data, search by keyword, and scan profile cards before moving into deeper evaluation.
+
+### Freelancer Profile
+
+![Freelancer profile](docs/screenshots/freelancer-profile.png)
+
+Each freelancer profile exposes pricing, trust signals, skills, and direct conversion actions such as hire, messaging, and project invites.
+
+### Browse Jobs
+
+![Browse jobs](docs/screenshots/jobs.png)
+
+Freelancers can explore open client projects and move into proposal-driven workflows from a dedicated jobs marketplace.
+
+### Client Dashboard
+
+![Client dashboard](docs/screenshots/client-dashboard.png)
+
+The client dashboard centralizes job management, proposal review, and project progress for active hiring decisions.
+
+### Freelancer Dashboard
+
+![Freelancer dashboard](docs/screenshots/freelance-dashboard.png)
+
+The freelancer workspace provides a richer product view with earnings, applications, and profile-centered activity management.
+
+### Saved Freelancers
+
+![Saved freelancers](docs/screenshots/saved.png)
+
+Clients can build a shortlist of saved freelancers and return later to compare, contact, or invite the right fit.
+
+### Notifications
+
+![Notifications center](docs/screenshots/notifications.png)
+
+Marketplace updates such as messages, hires, reviews, and proposal events surface in a dedicated notifications view.
+
 ## Key Features
 
 - JWT authentication with client and freelancer roles
