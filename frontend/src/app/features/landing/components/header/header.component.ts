@@ -41,7 +41,6 @@ export class HeaderComponent {
     { label: 'Saved', path: '/saved-freelancers' },
     { label: 'Inbox', path: '/messages' },
     { label: 'Find Freelancers', path: '/marketplace' },
-    { label: 'How It Works', path: '/how-it-works' },
     { label: 'Post a Job', path: '/post-job' },
   ];
 
@@ -51,7 +50,6 @@ export class HeaderComponent {
     { label: 'My Applications', path: '/my-applications' },
     { label: 'Inbox', path: '/messages' },
     { label: 'Browse Jobs', path: '/jobs' },
-    { label: 'How It Works', path: '/how-it-works' },
   ];
 
   readonly navLinks = computed(() => this.resolveNavLinks(this.role()));
