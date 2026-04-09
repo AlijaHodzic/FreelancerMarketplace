@@ -29,7 +29,9 @@ export class FreelancerDashboardComponent implements OnInit {
   readonly bids = signal<Bid[]>([]);
   readonly loading = signal(true);
   readonly saving = signal(false);
+  readonly payoutSubmitting = signal(false);
   readonly editOpen = signal(false);
+  readonly payoutOpen = signal(false);
   readonly errorMessage = signal('');
   readonly successMessage = signal('');
   readonly avatarPreview = signal('');
@@ -48,6 +50,11 @@ export class FreelancerDashboardComponent implements OnInit {
     description: ['', [Validators.required, Validators.minLength(12)]],
     about: ['', [Validators.required, Validators.minLength(24)]],
     skillsText: ['', [Validators.required, Validators.minLength(2)]],
+  });
+
+  readonly payoutForm = this.formBuilder.nonNullable.group({
+    provider: ['Payoneer', [Validators.required]],
+    amount: [250, [Validators.required, Validators.min(1)]],
   });
 
   readonly portfolioItems = signal<FreelancerPortfolioItem[]>([]);
@@ -107,6 +114,39 @@ export class FreelancerDashboardComponent implements OnInit {
 
   closeEdit() {
     this.editOpen.set(false);
+  }
+
+  openPayout() {
+    const profile = this.profile();
+    this.payoutForm.reset({
+      provider: 'Payoneer',
+      amount: profile ? Math.max(Math.round(profile.hourlyRate * 10), 50) : 250,
+    });
+    this.payoutOpen.set(true);
+    this.errorMessage.set('');
+    this.successMessage.set('');
+  }
+
+  closePayout() {
+    this.payoutOpen.set(false);
+  }
+
+  submitPayout() {
+    if (this.payoutForm.invalid) {
+      this.payoutForm.markAllAsTouched();
+      return;
+    }
+
+    this.payoutSubmitting.set(true);
+    this.errorMessage.set('');
+
+    const { provider, amount } = this.payoutForm.getRawValue();
+
+    setTimeout(() => {
+      this.payoutSubmitting.set(false);
+      this.payoutOpen.set(false);
+      this.successMessage.set(`Demo payout request submitted via ${provider} for ${amount.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })}.`);
+    }, 700);
   }
 
   onAvatarInputChange(value: string) {

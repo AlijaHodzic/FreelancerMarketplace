@@ -94,10 +94,6 @@ export class HeaderComponent {
   }
 
   private resolvePrimaryAction(role: UserRole | null): HeaderLink | null {
-    if (role === 'Freelancer') {
-      return { label: 'Withdraw', path: '/freelancer-dashboard' };
-    }
-
     if (role === 'Client' || role === 'Admin') {
       return { label: 'Post a Job', path: '/post-job' };
     }
