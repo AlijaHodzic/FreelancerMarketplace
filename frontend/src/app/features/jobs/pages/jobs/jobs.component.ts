@@ -7,6 +7,7 @@ import { AuthService } from '../../../../core/auth/auth.service';
 import { Project } from '../../../../core/models/project.models';
 import { BidsService } from '../../../../core/services/bids.service';
 import { ProjectsService } from '../../../../core/services/projects.service';
+import { SavedJobsService } from '../../../../core/services/saved-jobs.service';
 import { getProjectStatusBadge } from '../../../../core/utils/status-badges';
 
 @Component({
@@ -21,6 +22,7 @@ export class JobsComponent implements OnInit {
   private readonly projectsService = inject(ProjectsService);
   private readonly bidsService = inject(BidsService);
   private readonly authService = inject(AuthService);
+  private readonly savedJobsService = inject(SavedJobsService);
   private readonly formBuilder = inject(FormBuilder);
 
   readonly projects = signal<Project[]>([]);
@@ -31,14 +33,22 @@ export class JobsComponent implements OnInit {
   readonly selectedProjectId = signal<string | null>(null);
   readonly searchTerm = signal('');
   readonly sortBy = signal<'latest' | 'budget-high' | 'budget-low'>('latest');
+  readonly savedOnly = signal(false);
   readonly isFreelancer = computed(() => this.authService.role() === 'Freelancer');
   readonly isGuest = computed(() => !this.authService.isAuthenticated());
   readonly projectStatusBadge = getProjectStatusBadge;
+  readonly savedJobIds = this.savedJobsService.savedIds;
+  readonly savedJobsCount = computed(() => this.savedJobIds().length);
 
   readonly filteredProjects = computed(() => {
     const query = this.searchTerm().trim().toLowerCase();
     const sortBy = this.sortBy();
+    const savedOnly = this.savedOnly();
     let projects = this.projects();
+
+    if (savedOnly) {
+      projects = projects.filter((project) => this.savedJobsService.isSaved(project.id));
+    }
 
     if (query) {
       projects = projects.filter((project) =>
@@ -81,6 +91,19 @@ export class JobsComponent implements OnInit {
   cancelProposal() {
     this.selectedProjectId.set(null);
     this.errorMessage.set('');
+  }
+
+  toggleSavedOnly() {
+    this.savedOnly.update((value) => !value);
+  }
+
+  toggleSaveJob(projectId: string) {
+    this.savedJobsService.toggle(projectId);
+    this.successMessage.set(this.savedJobsService.isSaved(projectId) ? 'Job saved for later.' : 'Job removed from saved list.');
+  }
+
+  isJobSaved(projectId: string) {
+    return this.savedJobsService.isSaved(projectId);
   }
 
   submitProposal() {
