@@ -44,6 +44,14 @@ export class HeaderComponent {
     { label: 'Post a Job', path: '/post-job' },
   ];
 
+  private readonly adminNavLinks: HeaderLink[] = [
+    { label: 'Admin', path: '/admin' },
+    { label: 'Users', path: '/admin' },
+    { label: 'Projects', path: '/admin' },
+    { label: 'Inbox', path: '/messages' },
+    { label: 'Notifications', path: '/notifications' },
+  ];
+
   private readonly freelancerNavLinks: HeaderLink[] = [
     { label: 'Home', path: '/' },
     { label: 'Dashboard', path: '/freelancer-dashboard' },
@@ -84,7 +92,11 @@ export class HeaderComponent {
       return this.freelancerNavLinks;
     }
 
-    if (role === 'Client' || role === 'Admin') {
+    if (role === 'Admin') {
+      return this.adminNavLinks;
+    }
+
+    if (role === 'Client') {
       return this.clientNavLinks;
     }
 
@@ -92,7 +104,7 @@ export class HeaderComponent {
   }
 
   private resolvePrimaryAction(role: UserRole | null): HeaderLink | null {
-    if (role === 'Client' || role === 'Admin') {
+    if (role === 'Client') {
       return { label: 'Post a Job', path: '/post-job' };
     }
 

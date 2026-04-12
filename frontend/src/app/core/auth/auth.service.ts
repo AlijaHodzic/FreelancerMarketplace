@@ -52,7 +52,11 @@ export class AuthService {
       return '/freelancer-dashboard';
     }
 
-    if (role === 'Client' || role === 'Admin') {
+    if (role === 'Admin') {
+      return '/admin';
+    }
+
+    if (role === 'Client') {
       return '/client-dashboard';
     }
 

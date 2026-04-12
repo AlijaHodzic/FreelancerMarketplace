@@ -29,6 +29,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(sqliteConnectionString);
 });
 
+builder.Services.AddScoped<IAdminDashboardService, AdminDashboardService>();
 builder.Services.AddScoped<IBidService, BidService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IClientProfileService, ClientProfileService>();
@@ -130,6 +131,7 @@ using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     await EnsureSqliteSchemaAsync(dbContext, sqliteConnectionString);
+    await SeedDemoAdminAsync(dbContext);
     await SeedDemoFreelancersAsync(dbContext);
     await SeedDemoClientsAndProjectsAsync(dbContext);
 }
@@ -314,6 +316,34 @@ static async Task SeedDemoFreelancersAsync(AppDbContext dbContext)
 
         dbContext.Users.Add(demoFreelancer);
     }
+
+    await dbContext.SaveChangesAsync();
+}
+
+static async Task SeedDemoAdminAsync(AppDbContext dbContext)
+{
+    if (await dbContext.Users.AnyAsync(user => user.Email == "admin@freelancehub.demo"))
+    {
+        return;
+    }
+
+    dbContext.Users.Add(new User
+    {
+        FullName = "Admin User",
+        Email = "admin@freelancehub.demo",
+        PasswordHash = BCrypt.Net.BCrypt.HashPassword("Pass1234"),
+        Role = UserRole.Admin,
+        Slug = "admin-user",
+        Headline = "Platform Administrator",
+        AvatarUrl = "https://i.pravatar.cc/160?img=68",
+        Location = "Remote",
+        Category = "Platform Operations",
+        ExperienceLevel = "Admin",
+        ResponseTime = "Same day",
+        SuccessRate = "100%",
+        ShortDescription = "Demo admin account for reviewing platform activity.",
+        About = "Demo administrator used to inspect marketplace users, projects, bids, messaging, and notification metrics.",
+    });
 
     await dbContext.SaveChangesAsync();
 }

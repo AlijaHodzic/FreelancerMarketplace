@@ -28,6 +28,21 @@ export const clientOnlyGuard: CanActivateFn = () => {
   return true;
 };
 
+export const adminOnlyGuard: CanActivateFn = () => {
+  const authService = inject(AuthService);
+  const router = inject(Router);
+
+  if (!authService.isAuthenticated()) {
+    return router.createUrlTree(['/login']);
+  }
+
+  if (authService.role() !== 'Admin') {
+    return router.createUrlTree([authService.getDefaultRouteForRole(authService.role())]);
+  }
+
+  return true;
+};
+
 export const authenticatedOnlyGuard: CanActivateFn = () => {
   const authService = inject(AuthService);
   const router = inject(Router);

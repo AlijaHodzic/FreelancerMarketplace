@@ -14,7 +14,9 @@ import { ClientDashboardComponent } from './features/dashboard/pages/client-dash
 import { MessagesComponent } from './features/messages/pages/messages/messages.component';
 import { NotificationsComponent } from './features/notifications/pages/notifications/notifications.component';
 import { FavoriteFreelancersComponent } from './features/favorites/pages/favorite-freelancers/favorite-freelancers.component';
+import { AdminDashboardComponent } from './features/admin/pages/admin-dashboard/admin-dashboard.component';
 import {
+  adminOnlyGuard,
   authenticatedOnlyGuard,
   clientOnlyGuard,
   freelancerOnlyGuard,
@@ -37,6 +39,7 @@ export const routes: Routes = [
       { path: 'saved-freelancers', component: FavoriteFreelancersComponent, canActivate: [clientOnlyGuard] },
       { path: 'messages', component: MessagesComponent, canActivate: [authenticatedOnlyGuard] },
       { path: 'notifications', component: NotificationsComponent, canActivate: [authenticatedOnlyGuard] },
+      { path: 'admin', component: AdminDashboardComponent, canActivate: [adminOnlyGuard] },
       { path: 'jobs', component: JobsComponent, canActivate: [freelancerOrGuestGuard] },
       { path: 'how-it-works', component: HowItWorksComponent },
       { path: 'post-job', component: PostJobComponent, canActivate: [clientOnlyGuard] },
