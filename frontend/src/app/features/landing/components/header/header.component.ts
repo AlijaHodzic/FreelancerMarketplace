@@ -4,6 +4,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../../../core/auth/auth.service';
 import { UserRole } from '../../../../core/models/auth.models';
 import { NotificationsService } from '../../../../core/services/notifications.service';
+import { ThemeService } from '../../../../core/services/theme.service';
 
 interface HeaderLink {
   label: string;
@@ -20,12 +21,14 @@ interface HeaderLink {
 export class HeaderComponent {
   private readonly authService = inject(AuthService);
   private readonly notificationsService = inject(NotificationsService);
+  private readonly themeService = inject(ThemeService);
 
   readonly mobileMenuOpen = signal(false);
   readonly user = this.authService.user;
   readonly role = this.authService.role;
   readonly isAuthenticated = this.authService.isAuthenticated;
   readonly unreadNotifications = this.notificationsService.unreadCount;
+  readonly isDarkMode = this.themeService.isDarkMode;
 
   private readonly guestNavLinks: HeaderLink[] = [
     { label: 'Home', path: '/' },
@@ -85,6 +88,10 @@ export class HeaderComponent {
   logout() {
     this.authService.logout().subscribe();
     this.closeMobileMenu();
+  }
+
+  toggleTheme() {
+    this.themeService.toggleTheme();
   }
 
   private resolveNavLinks(role: UserRole | null): HeaderLink[] {
