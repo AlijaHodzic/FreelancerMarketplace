@@ -38,3 +38,10 @@ export interface AdminProject {
   bidsCount: number;
   createdAtUtc: string;
 }
+
+export interface AdminActivity {
+  type: 'user' | 'project' | 'bid' | 'message' | 'review';
+  title: string;
+  description: string;
+  createdAtUtc: string;
+}

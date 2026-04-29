@@ -22,4 +22,22 @@ public class AdminController : ControllerBase
     {
         return Ok(await _adminDashboardService.GetSummaryAsync());
     }
+
+    [HttpGet("users")]
+    public async Task<ActionResult<List<AdminUserDto>>> GetUsers()
+    {
+        return Ok(await _adminDashboardService.GetUsersAsync());
+    }
+
+    [HttpGet("projects")]
+    public async Task<ActionResult<List<AdminProjectDto>>> GetProjects()
+    {
+        return Ok(await _adminDashboardService.GetProjectsAsync());
+    }
+
+    [HttpGet("activity")]
+    public async Task<ActionResult<List<AdminActivityDto>>> GetActivity()
+    {
+        return Ok(await _adminDashboardService.GetActivityAsync());
+    }
 }

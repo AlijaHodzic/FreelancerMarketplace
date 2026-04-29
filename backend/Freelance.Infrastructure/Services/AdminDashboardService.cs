@@ -71,4 +71,125 @@ public class AdminDashboardService : IAdminDashboardService
                 .ToListAsync(),
         };
     }
+
+    public async Task<List<AdminUserDto>> GetUsersAsync()
+    {
+        return await _db.Users
+            .AsNoTracking()
+            .OrderByDescending(user => user.CreatedAtUtc)
+            .Select(user => new AdminUserDto
+            {
+                Id = user.Id,
+                FullName = user.FullName,
+                Email = user.Email,
+                Role = user.Role,
+                Location = user.Location,
+                CreatedAtUtc = user.CreatedAtUtc,
+            })
+            .ToListAsync();
+    }
+
+    public async Task<List<AdminProjectDto>> GetProjectsAsync()
+    {
+        return await _db.Projects
+            .AsNoTracking()
+            .Include(project => project.Owner)
+            .Include(project => project.Bids)
+            .OrderByDescending(project => project.CreatedAtUtc)
+            .Select(project => new AdminProjectDto
+            {
+                Id = project.Id,
+                Title = project.Title,
+                ClientName = project.Owner.FullName,
+                Status = project.Status,
+                BudgetMin = project.BudgetMin,
+                BudgetMax = project.BudgetMax,
+                BidsCount = project.Bids.Count,
+                CreatedAtUtc = project.CreatedAtUtc,
+            })
+            .ToListAsync();
+    }
+
+    public async Task<List<AdminActivityDto>> GetActivityAsync()
+    {
+        var userEvents = await _db.Users
+            .AsNoTracking()
+            .OrderByDescending(user => user.CreatedAtUtc)
+            .Take(10)
+            .Select(user => new AdminActivityDto
+            {
+                Type = "user",
+                Title = "New user joined",
+                Description = $"{user.FullName} joined as {user.Role}.",
+                CreatedAtUtc = user.CreatedAtUtc,
+            })
+            .ToListAsync();
+
+        var projectEvents = await _db.Projects
+            .AsNoTracking()
+            .Include(project => project.Owner)
+            .OrderByDescending(project => project.CreatedAtUtc)
+            .Take(10)
+            .Select(project => new AdminActivityDto
+            {
+                Type = "project",
+                Title = "Project posted",
+                Description = $"{project.Owner.FullName} posted \"{project.Title}\".",
+                CreatedAtUtc = project.CreatedAtUtc,
+            })
+            .ToListAsync();
+
+        var bidEvents = await _db.Bids
+            .AsNoTracking()
+            .Include(bid => bid.Project)
+            .Include(bid => bid.Freelancer)
+            .OrderByDescending(bid => bid.CreatedAtUtc)
+            .Take(10)
+            .Select(bid => new AdminActivityDto
+            {
+                Type = "bid",
+                Title = "Proposal submitted",
+                Description = $"{bid.Freelancer.FullName} submitted a proposal for \"{bid.Project.Title}\".",
+                CreatedAtUtc = bid.CreatedAtUtc,
+            })
+            .ToListAsync();
+
+        var messageEvents = await _db.Messages
+            .AsNoTracking()
+            .Include(message => message.Sender)
+            .OrderByDescending(message => message.CreatedAtUtc)
+            .Take(10)
+            .Select(message => new AdminActivityDto
+            {
+                Type = "message",
+                Title = "New message sent",
+                Description = $"{message.Sender.FullName} sent a new conversation message.",
+                CreatedAtUtc = message.CreatedAtUtc,
+            })
+            .ToListAsync();
+
+        var reviewEvents = await _db.Reviews
+            .AsNoTracking()
+            .Include(review => review.Client)
+            .Include(review => review.Freelancer)
+            .OrderByDescending(review => review.CreatedAtUtc)
+            .Take(10)
+            .Select(review => new AdminActivityDto
+            {
+                Type = "review",
+                Title = "Review published",
+                Description = $"{review.Client.FullName} reviewed {review.Freelancer.FullName}.",
+                CreatedAtUtc = review.CreatedAtUtc,
+            })
+            .ToListAsync();
+
+        return userEvents
+            .Concat(projectEvents)
+            .Concat(bidEvents)
+            .Concat(messageEvents)
+            .Concat(reviewEvents)
+            .OrderByDescending(item => item.CreatedAtUtc)
+            .Take(18)
+            .ToList();
+    }
 }
