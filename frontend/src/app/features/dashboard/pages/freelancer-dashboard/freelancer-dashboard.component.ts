@@ -1,5 +1,5 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { CurrencyPipe, NgClass, NgFor, NgIf } from '@angular/common';
+import { CurrencyPipe, NgClass, NgFor, NgIf, isPlatformBrowser } from '@angular/common';
+import { Component, OnInit, PLATFORM_ID, computed, inject, signal } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { catchError, finalize, forkJoin, of } from 'rxjs';
 import { AuthService } from '../../../../core/auth/auth.service';
@@ -23,6 +23,7 @@ export class FreelancerDashboardComponent implements OnInit {
   private readonly bidsService = inject(BidsService);
   private readonly notificationsService = inject(NotificationsService);
   private readonly formBuilder = inject(FormBuilder);
+  private readonly platformId = inject(PLATFORM_ID);
 
   readonly user = this.authService.user;
   readonly profile = signal<FreelancerProfile | null>(null);
@@ -81,6 +82,11 @@ export class FreelancerDashboardComponent implements OnInit {
   });
 
   ngOnInit() {
+    if (!isPlatformBrowser(this.platformId)) {
+      this.loading.set(false);
+      return;
+    }
+
     this.loadDashboard();
   }
 

@@ -1,5 +1,5 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
-import { DatePipe, NgClass, NgFor, NgIf } from '@angular/common';
+import { DatePipe, NgClass, NgFor, NgIf, isPlatformBrowser } from '@angular/common';
+import { Component, OnInit, PLATFORM_ID, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { catchError, finalize, of } from 'rxjs';
 import { NotificationItem } from '../../../../core/models/notification.models';
@@ -15,12 +15,18 @@ import { NotificationsService } from '../../../../core/services/notifications.se
 export class NotificationsComponent implements OnInit {
   private readonly notificationsService = inject(NotificationsService);
   private readonly router = inject(Router);
+  private readonly platformId = inject(PLATFORM_ID);
 
   readonly notifications = signal<NotificationItem[]>([]);
   readonly loading = signal(true);
   readonly errorMessage = signal('');
 
   ngOnInit() {
+    if (!isPlatformBrowser(this.platformId)) {
+      this.loading.set(false);
+      return;
+    }
+
     this.loadNotifications();
   }
 

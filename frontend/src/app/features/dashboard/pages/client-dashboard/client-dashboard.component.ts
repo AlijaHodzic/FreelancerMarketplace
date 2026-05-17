@@ -1,5 +1,5 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { CurrencyPipe, DatePipe, NgClass, NgFor, NgIf } from '@angular/common';
+import { CurrencyPipe, DatePipe, NgClass, NgFor, NgIf, isPlatformBrowser } from '@angular/common';
+import { Component, OnInit, PLATFORM_ID, computed, inject, signal } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { catchError, finalize, forkJoin, of } from 'rxjs';
@@ -30,6 +30,7 @@ export class ClientDashboardComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly reviewsService = inject(ReviewsService);
   private readonly formBuilder = inject(FormBuilder);
+  private readonly platformId = inject(PLATFORM_ID);
 
   readonly user = this.authService.user;
   readonly profile = signal<ClientProfile | null>(null);
@@ -62,6 +63,11 @@ export class ClientDashboardComponent implements OnInit {
   readonly totalProposals = computed(() => this.projects().reduce((sum, project) => sum + project.bids.length, 0));
 
   ngOnInit() {
+    if (!isPlatformBrowser(this.platformId)) {
+      this.loading.set(false);
+      return;
+    }
+
     this.loadProjects();
   }
 

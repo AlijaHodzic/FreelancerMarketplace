@@ -1,5 +1,5 @@
-import { DatePipe, NgClass, NgFor, NgIf } from '@angular/common';
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { DatePipe, NgClass, NgFor, NgIf, isPlatformBrowser } from '@angular/common';
+import { Component, OnInit, PLATFORM_ID, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { catchError, finalize, of } from 'rxjs';
@@ -21,6 +21,7 @@ export class MessagesComponent implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly platformId = inject(PLATFORM_ID);
 
   readonly conversations = signal<ConversationSummary[]>([]);
   readonly selectedConversation = signal<ConversationThread | null>(null);
@@ -46,6 +47,11 @@ export class MessagesComponent implements OnInit {
   });
 
   ngOnInit() {
+    if (!isPlatformBrowser(this.platformId)) {
+      this.loadingConversations.set(false);
+      return;
+    }
+
     this.loadConversations();
 
     this.route.queryParamMap.subscribe((params) => {

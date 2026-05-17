@@ -1,5 +1,5 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { CurrencyPipe, DatePipe, NgClass, NgFor, NgIf } from '@angular/common';
+import { CurrencyPipe, DatePipe, NgClass, NgFor, NgIf, isPlatformBrowser } from '@angular/common';
+import { Component, OnInit, PLATFORM_ID, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { catchError, finalize, of } from 'rxjs';
@@ -19,6 +19,7 @@ type ApplicationFilter = 'All' | 'Pending' | 'Accepted' | 'Rejected';
 export class FreelancerApplicationsComponent implements OnInit {
   private readonly bidsService = inject(BidsService);
   private readonly router = inject(Router);
+  private readonly platformId = inject(PLATFORM_ID);
 
   readonly bids = signal<Bid[]>([]);
   readonly loading = signal(true);
@@ -59,6 +60,11 @@ export class FreelancerApplicationsComponent implements OnInit {
   });
 
   ngOnInit() {
+    if (!isPlatformBrowser(this.platformId)) {
+      this.loading.set(false);
+      return;
+    }
+
     this.loadApplications();
   }
 
