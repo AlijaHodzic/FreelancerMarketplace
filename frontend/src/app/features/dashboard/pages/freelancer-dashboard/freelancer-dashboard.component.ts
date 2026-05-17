@@ -281,12 +281,14 @@ export class FreelancerDashboardComponent implements OnInit {
     forkJoin({
       profile: this.freelancersService.getMineProfile().pipe(catchError(() => of(null))),
       bids: this.bidsService.getMine().pipe(catchError(() => of([] as Bid[]))),
-      notifications: this.notificationsService.loadSummary(),
+      notifications: this.notificationsService.loadSummary().pipe(catchError(() => of(null))),
     })
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe(({ profile, bids }) => {
         if (!profile) {
           this.errorMessage.set('We could not load your freelancer workspace right now.');
+          this.profile.set(null);
+          this.bids.set([]);
           return;
         }
 
