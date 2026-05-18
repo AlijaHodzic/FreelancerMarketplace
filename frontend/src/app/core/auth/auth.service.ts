@@ -8,6 +8,10 @@ import { AuthResponse, AuthSession, AuthUser, LoginRequest, RegisterRequest, Use
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+  private readonly demoClientCredentials: LoginRequest = {
+    email: 'hello@novacommerce.demo',
+    password: 'Pass1234',
+  };
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
   private readonly platformId = inject(PLATFORM_ID);
@@ -19,6 +23,16 @@ export class AuthService {
   readonly role = computed<UserRole | null>(() => this.user()?.role ?? null);
   readonly isAuthenticated = computed(() => !!this.sessionState()?.accessToken);
   readonly accessToken = computed(() => this.sessionState()?.accessToken ?? null);
+
+  bootstrapDemoClientSession() {
+    if (!isPlatformBrowser(this.platformId) || this.sessionState() || !this.shouldAutoLoginDemoClient()) {
+      return;
+    }
+
+    this.login(this.demoClientCredentials)
+      .pipe(catchError(() => of(null)))
+      .subscribe();
+  }
 
   login(payload: LoginRequest) {
     return this.http.post<AuthResponse>(`${API_BASE_URL}/auth/login`, payload).pipe(tap((response) => this.storeSession(response)));
@@ -112,5 +126,14 @@ export class AuthService {
       localStorage.removeItem(this.storageKey);
       return null;
     }
+  }
+
+  private shouldAutoLoginDemoClient() {
+    if (!isPlatformBrowser(this.platformId)) {
+      return false;
+    }
+
+    const host = window.location.hostname.toLowerCase();
+    return host.includes('vercel.app') || host.includes('onrender.com');
   }
 }
